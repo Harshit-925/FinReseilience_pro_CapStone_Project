@@ -43,7 +43,7 @@ graph TD
 
     %% Flow
     User -->|Inputs Financial Data| UI
-    UI -->|JSON Payload (REST)| API
+    UI -->|JSON Payload REST| API
     
     API -->|Validates Inputs| Engine["Deterministic Engine<br/>- Avalanche<br/>- Tax Shield<br/>- Health Score"]:::backend
     
