@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FinResilience Pro | Financial Results Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            50: '#F8FAFC',
+                            100: '#F1F5F9',
+                            200: '#E2E8F0',
+                            300: '#CBD5E1',
+                            400: '#94A3B8',
+                            500: '#64748B',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1E293B',
+                            900: '#0F172A',
+                            950: '#020617',
+                        }
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter", "sans-serif"],
+                        "display": ["Inter", "sans-serif"],
+                        "body": ["Public Sans", "sans-serif"],
+                        "label": ["Public Sans", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #F8FAFC;
+            color: #1E293B;
+            -webkit-font-smoothing: antialiased;
+        }
+        .gauge-container {
+            position: relative;
+            width: 200px;
+            height: 100px;
+            overflow: hidden;
+        }
+        .gauge-bg {
+            fill: none;
+            stroke: #E2E8F0;
+            stroke-width: 12;
+        }
+        .gauge-fill {
+            fill: none;
+            stroke: #1E293B;
+            stroke-width: 12;
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 251.2;
+            transition: stroke-dashoffset 1s ease-out;
+        }
+    </style>
+</head>
+<body class="font-body">
+<!-- Top Navigation Bar -->
+<header class="w-full top-0 sticky bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm z-50">
+<div class="flex justify-between items-center h-16 px-6 max-w-full mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-xl font-headline font-bold text-slate-900 dark:text-white">WealthOrchestra</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="font-body text-sm font-medium text-slate-500 dark:text-slate-400 pb-2 hover:text-slate-900 dark:hover:text-white transition-colors duration-200 ease-in-out" href="#">Portfolio</a>
+<a class="font-body text-sm font-medium text-slate-500 dark:text-slate-400 pb-2 hover:text-slate-900 dark:hover:text-white transition-colors duration-200 ease-in-out" href="#">Markets</a>
+<a class="font-body text-sm font-medium text-slate-500 dark:text-slate-400 pb-2 hover:text-slate-900 dark:hover:text-white transition-colors duration-200 ease-in-out" href="#">Compliance</a>
+<a class="font-body text-sm font-medium text-slate-900 dark:text-white border-b-2 border-slate-900 dark:border-slate-100 pb-2" href="#">Reports</a>
+<a class="font-body text-sm font-medium text-slate-500 dark:text-slate-400 pb-2 hover:text-slate-900 dark:hover:text-white transition-colors duration-200 ease-in-out" href="#">Advisory</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-slate-500 hover:text-slate-900 transition-colors">notifications</button>
+<button class="material-symbols-outlined text-slate-500 hover:text-slate-900 transition-colors">settings</button>
+<button class="px-4 py-2 bg-slate-900 text-white text-xs font-bold uppercase tracking-wider rounded transition-colors hover:bg-slate-800">Execute Trade</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-slate-200">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a corporate financial executive, shot in high-key studio lighting with a clean white background. The subject is wearing a dark charcoal suit and a light grey shirt, maintaining a serious yet approachable institutional appearance. The image is crisp, high-resolution, and perfectly centered to fit a circular profile frame." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCx1uc3tK1x0GBaRYB2yHCjERhMjYKIE-U5XfQlgpMAY_BRag2MrpaZzYnIdDOubdrcwxq0ABFE24RqUKeRvYmucKM3ofYzxA7FHSgQ0YSdrgAOxC-sSNieYItcFWqSlbyNpeSa-lIKi5OQyL6-kgyLs1pO_ZryAz-mdN9LGNmek0qZlvmywBSpCnomziKQ6lECfNoRzpXY0J2d84A1qX4nJGcrDBOcYDlZtbD6mgTvBIQ_m6x2q-KapN8g2RidHr_opa-pyvhEtQ"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-6 py-10 space-y-12">
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h1 class="text-3xl font-headline font-extrabold text-slate-900 tracking-tight">FinResilience Pro Dashboard</h1>
+<p class="text-slate-500 text-sm mt-1">Real-time institutional liquidity and debt amortization analysis.</p>
+</div>
+<div class="flex items-center gap-2 text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded">
+<span class="material-symbols-outlined text-sm">schedule</span>
+                Last Updated: Oct 24, 2024 • 14:30 GMT
+            </div>
+</div>
+<!-- Section 1: Next Rupee Allocation (Hero) -->
+<section>
+<div class="flex items-center gap-2 mb-6">
+<span class="w-1.5 h-6 bg-slate-900"></span>
+<h2 class="text-lg font-headline font-bold text-slate-900 uppercase tracking-widest">Next Rupee Allocation</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Allocation Card 1 -->
+<div class="bg-white border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+<div>
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-slate-900 p-2 bg-slate-50 rounded">emergency_home</span>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter bg-slate-50 px-2 py-0.5 border border-slate-100">Priority 01</span>
+</div>
+<h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Emergency Fund</h3>
+<p class="text-2xl font-headline font-extrabold text-slate-900">₹45,000</p>
+<p class="text-[11px] text-slate-400 mt-2 leading-tight">Maintain 6 months of basic living expenses in a highly liquid HDFC savings account.</p>
+</div>
+<div class="mt-6 pt-6 border-t border-slate-50">
+<button class="w-full py-2.5 border border-slate-900 text-slate-900 text-[11px] font-extrabold uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all">Transfer Now</button>
+</div>
+</div>
+<!-- Allocation Card 2 -->
+<div class="bg-white border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+<div>
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-slate-900 p-2 bg-slate-50 rounded">payments</span>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter bg-slate-50 px-2 py-0.5 border border-slate-100">Priority 02</span>
+</div>
+<h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Debt Paydown</h3>
+<p class="text-2xl font-headline font-extrabold text-slate-900">₹82,500</p>
+<p class="text-[11px] text-slate-400 mt-2 leading-tight">Targeting Credit Card ID: #4492 (14.2% APR) using the Debt Avalanche method.</p>
+</div>
+<div class="mt-6 pt-6 border-t border-slate-50">
+<button class="w-full py-2.5 border border-slate-900 text-slate-900 text-[11px] font-extrabold uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all">Settle Principal</button>
+</div>
+</div>
+<!-- Allocation Card 3 -->
+<div class="bg-white border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+<div>
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-slate-900 p-2 bg-slate-50 rounded">show_chart</span>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter bg-slate-50 px-2 py-0.5 border border-slate-100">Priority 03</span>
+</div>
+<h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Index Funds</h3>
+<p class="text-2xl font-headline font-extrabold text-slate-900">₹1,20,000</p>
+<p class="text-[11px] text-slate-400 mt-2 leading-tight">Systematic Investment Plan (SIP) into Nifty 50 Large Cap Broad Market Index.</p>
+</div>
+<div class="mt-6 pt-6 border-t border-slate-50">
+<button class="w-full py-2.5 border border-slate-900 text-slate-900 text-[11px] font-extrabold uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all">Review Portfolio</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Month-by-Month Payoff Schedule (Debt Avalanche) -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-6 bg-slate-900"></span>
+<h2 class="text-lg font-headline font-bold text-slate-900 uppercase tracking-widest">Debt Avalanche Amortization</h2>
+</div>
+<button class="text-xs font-bold text-slate-500 hover:text-slate-900 flex items-center gap-1 uppercase tracking-tighter">
+<span class="material-symbols-outlined text-sm">download</span> Export CSV
+                </button>
+</div>
+<div class="bg-white border border-slate-200 shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 border-b border-slate-200">
+<th class="py-4 px-6 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Month</th>
+<th class="py-4 px-6 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Liability Entity</th>
+<th class="py-4 px-6 text-[11px] font-bold text-slate-500 uppercase tracking-widest text-center">Interest Rate</th>
+<th class="py-4 px-6 text-[11px] font-bold text-slate-500 uppercase tracking-widest text-right">Principal Paid</th>
+<th class="py-4 px-6 text-[11px] font-bold text-slate-500 uppercase tracking-widest text-right">Remaining Balance</th>
+</tr>
+</thead>
+<tbody class="text-sm font-body divide-y divide-slate-100">
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="py-4 px-6 font-semibold text-slate-900">Nov 2024</td>
+<td class="py-4 px-6 text-slate-600">Premium Credit Card #4492</td>
+<td class="py-4 px-6 text-center text-slate-500">14.20%</td>
+<td class="py-4 px-6 text-right font-medium text-slate-900">₹18,500</td>
+<td class="py-4 px-6 text-right font-bold text-slate-900">₹64,000</td>
+</tr>
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="py-4 px-6 font-semibold text-slate-900">Dec 2024</td>
+<td class="py-4 px-6 text-slate-600">Premium Credit Card #4492</td>
+<td class="py-4 px-6 text-center text-slate-500">14.20%</td>
+<td class="py-4 px-6 text-right font-medium text-slate-900">₹18,500</td>
+<td class="py-4 px-6 text-right font-bold text-slate-900">₹45,500</td>
+</tr>
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="py-4 px-6 font-semibold text-slate-900">Jan 2025</td>
+<td class="py-4 px-6 text-slate-600">Premium Credit Card #4492</td>
+<td class="py-4 px-6 text-center text-slate-500">14.20%</td>
+<td class="py-4 px-6 text-right font-medium text-slate-900 text-slate-900">₹18,500</td>
+<td class="py-4 px-6 text-right font-bold text-slate-900">₹27,000</td>
+</tr>
+<tr class="bg-slate-50/30">
+<td class="py-4 px-6 font-semibold text-slate-400">Feb 2025</td>
+<td class="py-4 px-6 text-slate-400 italic">Personal Loan #AX-09</td>
+<td class="py-4 px-6 text-center text-slate-400">11.50%</td>
+<td class="py-4 px-6 text-right font-medium text-slate-400">₹22,000</td>
+<td class="py-4 px-6 text-right font-bold text-slate-400">₹1,40,000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- Section 3: Bottom Analytics -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Health Score Gauge -->
+<div class="lg:col-span-1 bg-white border border-slate-200 p-8 shadow-sm flex flex-col items-center text-center">
+<div class="flex items-center gap-2 mb-6 self-start">
+<span class="w-1.5 h-4 bg-slate-900"></span>
+<h2 class="text-xs font-headline font-bold text-slate-900 uppercase tracking-widest">Health Score</h2>
+</div>
+<div class="gauge-container mb-4">
+<svg class="w-full h-full" viewbox="0 0 100 50">
+<path class="gauge-bg" d="M 10 50 A 40 40 0 0 1 90 50"></path>
+<path class="gauge-fill" d="M 10 50 A 40 40 0 0 1 90 50" id="gaugePath" stroke-dashoffset="62.8"></path>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-end pb-1">
+<span class="text-4xl font-headline font-extrabold text-slate-900">75</span>
+<span class="text-[10px] font-bold text-slate-400 uppercase">Resilience Index</span>
+</div>
+</div>
+<div class="mt-4">
+<p class="text-sm font-bold text-slate-900">Strong Liquidity Position</p>
+<p class="text-xs text-slate-500 mt-1 max-w-[200px]">You are in the top 15% of users with similar risk profiles.</p>
+</div>
+</div>
+<!-- AI Narrative Fallback Box -->
+<div class="lg:col-span-2 bg-slate-900 border border-slate-800 p-8 shadow-sm relative overflow-hidden group">
+<!-- Subtle Background Texture Pattern via CSS -->
+<div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#ffffff 0.5px, transparent 0.5px); background-size: 16px 16px;"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-6">
+<div class="p-1.5 bg-white rounded-full">
+<span class="material-symbols-outlined text-slate-900 text-sm" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<h2 class="text-xs font-headline font-bold text-white uppercase tracking-[0.2em]">Institutional Insight Engine</h2>
+</div>
+<div class="space-y-4">
+<p class="text-slate-300 font-body text-sm leading-relaxed">
+                            Based on your current <span class="text-white font-bold">₹2,47,500</span> monthly cash flow, the Debt Avalanche model suggests an aggressive surplus allocation towards <span class="text-white border-b border-slate-700">Credit Line #4492</span>. 
+                        </p>
+<p class="text-slate-300 font-body text-sm leading-relaxed">
+                            By increasing your monthly principal contribution by just <span class="text-white font-bold">8.5%</span>, you will reduce total interest liabilities by <span class="text-slate-100 font-bold">₹1,12,000</span> and reach debt-zero status 4 months earlier than previously forecasted.
+                        </p>
+<div class="pt-4 flex items-center gap-4">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Optimized ROI</span>
+<span class="text-lg font-headline font-bold text-white">+14.2%</span>
+</div>
+<div class="w-px h-8 bg-slate-800"></div>
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Time Saved</span>
+<span class="text-lg font-headline font-bold text-white">124 Days</span>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute bottom-4 right-8">
+<span class="text-[9px] text-slate-600 font-mono tracking-tighter">FIN-GPT ENGINE V4.2 // ANALYSIS COMPLETE</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-auto bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
+<div class="py-12 px-6 max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-8">
+<div class="space-y-4">
+<span class="font-headline font-bold text-slate-900 dark:text-white text-lg">WealthOrchestra</span>
+<p class="font-body text-xs leading-relaxed text-slate-500 dark:text-slate-400 max-w-xs">
+                    © 2024 WealthOrchestra Institutional Services. All rights reserved. Member FINRA/SIPC.
+                </p>
+</div>
+<div class="flex flex-wrap gap-x-8 gap-y-4">
+<div class="flex flex-col gap-3">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Compliance</span>
+<a class="font-body text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200" href="#">Privacy Policy</a>
+<a class="font-body text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200" href="#">Terms of Service</a>
+</div>
+<div class="flex flex-col gap-3">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Corporate</span>
+<a class="font-body text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200" href="#">SEC Filings</a>
+<a class="font-body text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200" href="#">Disclosures</a>
+</div>
+<div class="flex flex-col gap-3">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Support</span>
+<a class="font-body text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200" href="#">Contact Support</a>
+</div>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for the health gauge
+        window.addEventListener('DOMContentLoaded', () => {
+            const gaugePath = document.getElementById('gaugePath');
+            // Full arc length is 251.2
+            // Score 75 out of 100
+            // Percentage: 0.75
+            // Offset: 251.2 * (1 - 0.75) = 62.8
+            setTimeout(() => {
+                gaugePath.style.strokeDashoffset = '62.8';
+            }, 500);
+        });
+    </script>
+</body></html>

@@ -1,0 +1,11 @@
+title = "FinResilience Pro Gitleaks Config"
+
+[allowlist]
+  description = "Allowlisted patterns"
+  regexes = [
+    '''your_key_here''',
+    '''your_.*_here''',
+  ]
+  paths = [
+    '''.env\.example''',
+  ]
