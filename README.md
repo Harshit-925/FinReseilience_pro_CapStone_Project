@@ -36,18 +36,18 @@ graph TD
 
     %% Nodes
     User([User / Browser])
-    UI[React 18 Frontend<br/>(Vite, Zustand, Tailwind)]:::frontend
-    API[FastAPI Backend<br/>(Financial Engine)]:::backend
-    DB[(PocketBase<br/>SQLite + Auth)]:::db
-    Gemini[Google Gemini 2.5<br/>AI Narrative API]:::ai
+    UI["React 18 Frontend<br/>(Vite, Zustand, Tailwind)"]:::frontend
+    API["FastAPI Backend<br/>(Financial Engine)"]:::backend
+    DB[("PocketBase<br/>SQLite + Auth")]:::db
+    Gemini["Google Gemini 2.5<br/>AI Narrative API"]:::ai
 
     %% Flow
     User -->|Inputs Financial Data| UI
     UI -->|JSON Payload (REST)| API
     
-    API -->|Validates Inputs| Engine[Deterministic Engine<br/>- Avalanche<br/>- Tax Shield<br/>- Health Score]:::backend
+    API -->|Validates Inputs| Engine["Deterministic Engine<br/>- Avalanche<br/>- Tax Shield<br/>- Health Score"]:::backend
     
-    Engine -->|Output Summary| AI_Service[AI Service<br/>httpx Async]:::backend
+    Engine -->|Output Summary| AI_Service["AI Service<br/>httpx Async"]:::backend
     AI_Service -->|Prompts with Context| Gemini
     Gemini -.->|Personalized Advice| AI_Service
     
