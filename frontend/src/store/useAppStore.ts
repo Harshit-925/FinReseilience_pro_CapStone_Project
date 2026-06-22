@@ -8,6 +8,7 @@ import { analyzeHousehold } from "../api/client";
 
 interface AppState {
   result: AnalysisResponse | null;
+  lastInput: HouseholdInput | null;
   isLoading: boolean;
   error: string | null;
   analyze: (input: HouseholdInput) => Promise<void>;
@@ -17,6 +18,7 @@ interface AppState {
 
 export const useAppStore = create<AppState>((set) => ({
   result: null,
+  lastInput: null,
   isLoading: false,
   error: null,
 
@@ -24,13 +26,13 @@ export const useAppStore = create<AppState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const result = await analyzeHousehold(input);
-      set({ result, isLoading: false });
+      set({ result, lastInput: input, isLoading: false });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Analysis failed";
       set({ error: message, isLoading: false });
     }
   },
 
-  clearResult: () => set({ result: null }),
+  clearResult: () => set({ result: null, lastInput: null }),
   clearError: () => set({ error: null }),
 }));

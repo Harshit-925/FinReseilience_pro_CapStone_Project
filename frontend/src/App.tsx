@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Toaster } from "sonner";
-import { LogOut } from "lucide-react";
+import { Toaster, toast } from "sonner";
+import { LogOut, Bell } from "lucide-react";
 import { useAuthStore } from "./store/useAuthStore";
 import { useAppStore } from "./store/useAppStore";
 import AmbientGradient from "./components/AmbientGradient";
@@ -13,13 +13,20 @@ import HistoryChart from "./components/HistoryChart";
 import GoalTracker from "./components/GoalTracker";
 import ReportExport from "./components/ReportExport";
 import DataRetentionNotice from "./components/DataRetentionNotice";
+import ChatPanel from "./components/ChatPanel";
+import WhatIfPanel from "./components/WhatIfPanel";
+import { getNotifications } from "./api/chat";
+import type { NotificationPayload } from "./api/chat";
 
 type View = "landing" | "login" | "signup" | "dashboard";
+type DashboardTab = "analysis" | "agent";
 
 export default function App() {
   const { isAuthenticated, user, logout } = useAuthStore();
-  const { result } = useAppStore();
+  const { result, lastInput } = useAppStore();
   const [view, setView] = useState<View>("landing");
+  const [dashboardTab, setDashboardTab] = useState<DashboardTab>("analysis");
+  const [notifications, setNotifications] = useState<NotificationPayload[]>([]);
 
   // Track whether the user was previously authenticated so we can
   // detect a logout event. We must NEVER snap back to landing just
@@ -33,6 +40,8 @@ export default function App() {
       if (view === "login" || view === "signup") {
         setView("dashboard");
       }
+      // Fetch notifications
+      getNotifications().then(setNotifications).catch(console.error);
     } else if (wasAuthenticated && !isAuthenticated) {
       // User actively logged out — return to landing
       setWasAuthenticated(false);
@@ -40,6 +49,20 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
+
+  const handleShowNotifications = () => {
+    if (notifications.length === 0) {
+      toast.info("No new notifications");
+      return;
+    }
+    notifications.forEach(n => {
+      toast(n.type === 'foir_alert' ? '⚠️ Alert' : '📅 Reminder', {
+        description: n.message,
+        duration: 8000,
+      });
+    });
+    // In a real app we would mark them as read here.
+  };
 
   return (
     <div style={{ minHeight: "100vh", fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", color: "var(--c-navy)" }}>
@@ -78,7 +101,13 @@ export default function App() {
               <nav style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 {isAuthenticated ? (
                   <>
-                    <span style={{ fontSize: 13, color: "var(--c-muted)", fontWeight: 500 }}>{user?.email}</span>
+                    <button type="button" onClick={handleShowNotifications} className="btn-ghost relative" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36, padding: 0, borderRadius: "50%" }}>
+                      <Bell size={18} />
+                      {notifications.length > 0 && (
+                        <span style={{ position: "absolute", top: 6, right: 6, width: 8, height: 8, background: "var(--c-coral)", borderRadius: "50%" }}></span>
+                      )}
+                    </button>
+                    <span style={{ fontSize: 13, color: "var(--c-muted)", fontWeight: 500, marginLeft: 8 }}>{user?.email}</span>
                     <button type="button" onClick={logout} className="btn-ghost" style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", fontSize: 13 }}>
                       <LogOut size={14} /> Log Out
                     </button>
@@ -123,47 +152,107 @@ export default function App() {
         {/* ── DASHBOARD ── */}
         {view === "dashboard" && (
           <div style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 24px" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 48, alignItems: "center" }}>
-
-              {/* Top: Input Form */}
-              <div style={{ width: "100%", maxWidth: 800 }}>
-                <InputForm />
-              </div>
-
-              {/* Bottom: Results */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
-                {result ? (
-                  <>
-                    <ResultsPanel result={result} />
-                    {isAuthenticated && (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                        <GoalTracker />
-                        <HistoryChart />
-                      </div>
-                    )}
-                    <ReportExport result={result} />
-                  </>
-                ) : (
-                  <div className="card" style={{ padding: 64, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
-                    <div style={{ width: 56, height: 56, background: "var(--c-emerald-lt)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: 28, color: "var(--c-emerald)", fontVariationSettings: "'FILL' 1" }}>analytics</span>
-                    </div>
-                    <h2 style={{ margin: "0 0 10px", fontSize: 18, fontWeight: 700, color: "var(--c-navy)", letterSpacing: "-0.01em" }}>Ready to Analyze</h2>
-                    <p style={{ margin: "0 0 20px", fontSize: 14, color: "var(--c-muted)", maxWidth: 300, marginLeft: "auto", marginRight: "auto", lineHeight: 1.7 }}>
-                      Enter your financial snapshot above and click <strong style={{ color: "var(--c-navy)" }}>Analyze &amp; Optimize Capital</strong> to view your personalized wealth routing plan.
-                    </p>
-                    {!isAuthenticated && (
-                      <p style={{ fontSize: 12, color: "var(--c-muted)", margin: 0 }}>
-                        <button type="button" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--c-emerald)", fontWeight: 600, fontSize: 12, textDecoration: "underline", padding: 0 }} onClick={() => setView("login")}>
-                          Sign in
-                        </button>
-                        {" "}to save your history and track progress over time.
-                      </p>
-                    )}
-                  </div>
-                )}
+            
+            {/* Tabs */}
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
+              <div style={{ display: "flex", background: "var(--c-bg)", padding: 4, borderRadius: 8, border: "1px solid var(--c-border)" }}>
+                <button
+                  onClick={() => setDashboardTab("analysis")}
+                  style={{
+                    padding: "8px 24px",
+                    background: dashboardTab === "analysis" ? "var(--c-white)" : "transparent",
+                    border: "none",
+                    borderRadius: 6,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: dashboardTab === "analysis" ? "var(--c-navy)" : "var(--c-muted)",
+                    boxShadow: dashboardTab === "analysis" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                    cursor: "pointer",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  Full Analysis
+                </button>
+                <button
+                  onClick={() => setDashboardTab("agent")}
+                  style={{
+                    padding: "8px 24px",
+                    background: dashboardTab === "agent" ? "var(--c-white)" : "transparent",
+                    border: "none",
+                    borderRadius: 6,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: dashboardTab === "agent" ? "var(--c-navy)" : "var(--c-muted)",
+                    boxShadow: dashboardTab === "agent" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>smart_toy</span>
+                  AI Agent
+                </button>
               </div>
             </div>
+
+            {dashboardTab === "analysis" ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 48, alignItems: "center" }}>
+                {/* Top: Input Form */}
+                <div style={{ width: "100%", maxWidth: 800 }}>
+                  <InputForm />
+                </div>
+
+                {/* Bottom: Results */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
+                  {result ? (
+                    <>
+                      <ResultsPanel result={result} />
+                      {isAuthenticated && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                          <GoalTracker />
+                          <HistoryChart />
+                        </div>
+                      )}
+                      <ReportExport result={result} />
+                    </>
+                  ) : (
+                    <div className="card" style={{ padding: 64, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
+                      <div style={{ width: 56, height: 56, background: "var(--c-emerald-lt)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: 28, color: "var(--c-emerald)", fontVariationSettings: "'FILL' 1" }}>analytics</span>
+                      </div>
+                      <h2 style={{ margin: "0 0 10px", fontSize: 18, fontWeight: 700, color: "var(--c-navy)", letterSpacing: "-0.01em" }}>Ready to Analyze</h2>
+                      <p style={{ margin: "0 0 20px", fontSize: 14, color: "var(--c-muted)", maxWidth: 300, marginLeft: "auto", marginRight: "auto", lineHeight: 1.7 }}>
+                        Enter your financial snapshot above and click <strong style={{ color: "var(--c-navy)" }}>Analyze &amp; Optimize Capital</strong> to view your personalized wealth routing plan.
+                      </p>
+                      {!isAuthenticated && (
+                        <p style={{ fontSize: 12, color: "var(--c-muted)", margin: 0 }}>
+                          <button type="button" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--c-emerald)", fontWeight: 600, fontSize: 12, textDecoration: "underline", padding: 0 }} onClick={() => setView("login")}>
+                            Sign in
+                          </button>
+                          {" "}to save your history and track progress over time.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 32, maxWidth: 1000, margin: "0 auto" }}>
+                {!result && (
+                  <div style={{ padding: 16, background: "#fff5f5", borderRadius: 8, border: "1px solid #ffe3e3", color: "#e03131", fontSize: 14 }}>
+                    <strong>Note:</strong> You haven't run a full analysis yet. The agent won't have your current financial profile available for simulations until you run an analysis on the Full Analysis tab.
+                  </div>
+                )}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 32 }}>
+                  {lastInput && (
+                    <WhatIfPanel baseProfile={lastInput} />
+                  )}
+                  <ChatPanel sessionId={isAuthenticated ? user?.id || "anon" : "anon"} profileSnapshot={lastInput || undefined} />
+                </div>
+              </div>
+            )}
 
             <div style={{ marginTop: 32, paddingTop: 24, borderTop: "1px solid var(--c-border)" }}>
               <DataRetentionNotice />

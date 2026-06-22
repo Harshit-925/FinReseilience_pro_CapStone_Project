@@ -37,8 +37,13 @@ This platform evaluates debt using the **Avalanche Method**, optimizes domestic 
 | **Type-safe API contract** | `backend/app/models/schemas.py` | Pydantic v2 + Zod frontend mirror |
 | **Accessibility (WCAG 2.1 AA)** | `frontend/src/components/InputForm.test.tsx` L6 | axe-core zero-violation assertion |
 | **Rate limiting** | `backend/app/core/rate_limit.py` | 10 req/min per IP via slowapi |
-| **8 backend + 3 frontend tests** | `backend/tests/` + `frontend/src/components/` | `pytest -v` → 8 passed; `vitest run` → 3 passed |
+| **10 backend + 4 frontend tests** | `backend/tests/` + `frontend/src/components/` | `pytest -v` → 10 passed; `vitest run` → 4 passed |
 | **Regulatory citations** | `docs/JUDGE_EVIDENCE.md` Section 5 | IT Act 1961, Finance Act 2025, RBI 2022 |
+| **Agentic Function Calling** | `backend/app/agent/tools.py` | 5 registered math/memory tools |
+| **State Machine Execution Loop** | `backend/app/agent/loop.py` | Plan/act/observe multi-step execution |
+| **Guardrails & Hallucination Stripping** | `backend/app/agent/guardrails.py` | Sentence-level numeric precision validation |
+| **Chat Memory & Needs-Replan State** | `backend/app/agent/memory.py` | 10% profile drift detection logic |
+| **Proactive Asynchronous Scheduling** | `backend/app/agent/scheduler.py` | APScheduler for FOIR and tax deadlines |
 
 ---
 

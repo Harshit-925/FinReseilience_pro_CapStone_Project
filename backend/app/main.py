@@ -65,10 +65,13 @@ def create_app() -> FastAPI:
     # 7. Routes
     app.include_router(router)
 
+    from app.agent.scheduler import setup_scheduler
+
     # 8. Startup event — verify PocketBase is reachable
     @app.on_event("startup")
     async def startup_checks() -> None:
         check_rate_limit_storage()
+        setup_scheduler(app)
 
         try:
             async with httpx.AsyncClient(timeout=3.0) as client:

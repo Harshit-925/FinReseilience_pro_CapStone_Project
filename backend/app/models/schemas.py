@@ -137,3 +137,67 @@ class HealthResponse(BaseModel):
 
     status: str
     pocketbase: str
+
+
+# ---------------------------------------------------------------------------
+# Agentic Upgrade Models
+# ---------------------------------------------------------------------------
+
+class ChatRequest(BaseModel):
+    """Request payload for /api/chat"""
+    message: str
+    session_id: str
+    profile_snapshot: HouseholdInput | None = None
+
+
+class ChatResponse(BaseModel):
+    """Response payload for /api/chat"""
+    reply: str
+    tool_calls_made: list[str]
+    tool_results: list[dict[str, Any]]
+    fallback_used: bool
+
+
+class WhatIfChange(BaseModel):
+    type: str = Field(..., description="income_raise, income_cut, new_debt, remove_debt, expense_change")
+    value: float = Field(..., description="Absolute ₹ amount")
+    extra: dict[str, Any] = Field(default_factory=dict)
+
+
+class WhatIfRequest(BaseModel):
+    """Request payload for /api/whatif"""
+    base_profile: HouseholdInput
+    change: WhatIfChange
+
+
+class WhatIfResponse(BaseModel):
+    """Response payload for /api/whatif"""
+    change_type: str
+    before: dict[str, Any]
+    after: dict[str, Any]
+    delta: dict[str, Any]
+
+
+class GoalInput(BaseModel):
+    title: str
+    target_date: str
+    metric_type: str
+    target_value: float
+
+
+class GoalProgress(BaseModel):
+    id: str
+    title: str
+    target_date: str
+    metric_type: str
+    target_value: float
+    current_value: float
+    status: str
+
+
+class NotificationResponse(BaseModel):
+    id: str
+    type: str
+    message: str
+    read: bool
+    created: str

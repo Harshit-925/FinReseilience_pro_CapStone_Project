@@ -13,11 +13,17 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from slowapi import Limiter
 
-from app.core.auth import get_optional_user
+from app.agent.loop import run_agent_turn
+from app.agent.memory import MemoryManager
+from app.agent.tools import execute_tool
+from app.core.auth import get_optional_user, get_current_user
 from app.core.config import get_settings
 from app.core.rate_limit import limiter
 from app.engine.calculator import allocate_surplus
-from app.models.schemas import AnalysisResponse, HouseholdInput, HealthResponse
+from app.models.schemas import (
+    AnalysisResponse, ChatRequest, ChatResponse, GoalInput, GoalProgress,
+    HealthResponse, HouseholdInput, NotificationResponse, WhatIfRequest, WhatIfResponse
+)
 from app.services.ai_service import generate_narrative
 from app.services.pocketbase_client import save_result
 
@@ -171,3 +177,98 @@ async def analyze(
             status_code=500,
             detail="Analysis failed — please try again",
         )
+
+
+@router.post("/chat", response_model=ChatResponse)
+@limiter.limit("20/minute")
+async def chat(
+    request: Request,
+    payload: ChatRequest,
+    user: dict[str, Any] | None = Depends(get_optional_user),
+) -> ChatResponse:
+    """Agentic chat loop with function calling and session memory."""
+    try:
+        user_id = user.get("id", "anonymous") if user else "anonymous"
+        user_token = user.get("token", "") if user else ""
+        
+        memory = MemoryManager(user_id, user_token) if user else None
+        last_session = await memory.get_last_session() if memory else None
+        
+        # Build context
+        needs_replan = False
+        if memory and payload.profile_snapshot:
+            needs_replan = memory.detect_needs_replan(
+                current_profile=payload.profile_snapshot.model_dump(),
+                last_session=last_session,
+            )
+            
+        memory_context = memory.build_context_string(last_session, needs_replan) if memory else "No previous session found."
+        
+        # Run agent loop
+        result = await run_agent_turn(
+            user_message=payload.message,
+            memory_context=memory_context,
+            profile_snapshot=payload.profile_snapshot.model_dump() if payload.profile_snapshot else None,
+            user_id=user_id,
+            user_token=user_token,
+        )
+        
+        # Save chat turn if authenticated
+        if memory:
+            await memory.save_chat_turn(
+                session_id=payload.session_id,
+                user_message=payload.message,
+                agent_reply=result["reply"],
+                tool_calls_made=result["tool_calls_made"],
+            )
+            
+        return ChatResponse(
+            reply=result["reply"],
+            tool_calls_made=result["tool_calls_made"],
+            tool_results=result["tool_results"],
+            fallback_used=result["fallback_used"],
+        )
+        
+    except Exception as exc:
+        logger.error("Chat failed: %s", type(exc).__name__)
+        raise HTTPException(status_code=500, detail="Chat failed")
+
+
+@router.post("/whatif", response_model=WhatIfResponse)
+@limiter.limit("30/minute")
+async def whatif(
+    request: Request,
+    payload: WhatIfRequest,
+    user: dict[str, Any] | None = Depends(get_optional_user),
+) -> WhatIfResponse:
+    """Synchronous what-if simulation tool endpoint."""
+    try:
+        tool_args = {
+            "base_income": payload.base_profile.monthly_income,
+            "base_expenses": payload.base_profile.monthly_expenses,
+            "base_debts": [d.model_dump() for d in payload.base_profile.debts],
+            "base_investments": [i.model_dump() for i in payload.base_profile.existing_investments],
+            "change_type": payload.change.type,
+            "change_value": payload.change.value,
+            "change_extra": payload.change.extra,
+        }
+        
+        result = await execute_tool("run_what_if", tool_args)
+        
+        return WhatIfResponse(
+            change_type=result["change_type"],
+            before=result["before"],
+            after=result["after"],
+            delta=result["delta"],
+        )
+        
+    except Exception as exc:
+        logger.error("Whatif failed: %s", type(exc).__name__)
+        raise HTTPException(status_code=500, detail="Simulation failed")
+
+
+@router.get("/notifications", response_model=list[NotificationResponse])
+async def get_notifications(user: dict[str, Any] = Depends(get_current_user)) -> list[NotificationResponse]:
+    """Get unread proactive alerts."""
+    memory = MemoryManager(user["id"], user["token"])
+    return await memory.get_unread_notifications()

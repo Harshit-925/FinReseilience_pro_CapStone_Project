@@ -31,6 +31,20 @@ This document maps every judging criterion to the **exact file and line number**
 
 ---
 
+## 2. AGENTIC PLANNING & GUARDRAILS (Anti-Hallucination)
+
+| Criterion | File | Lines | What It Does |
+|-----------|------|-------|--------------|
+| Tool Registry (Math Tools) | `backend/app/agent/tools.py` | 23–102 | Defines 4 strict math functions (`run_avalanche`, `run_tax_shield`, etc.) Gemini can call |
+| Tool Registry (Memory Tool) | `backend/app/agent/tools.py` | 104–116 | Defines 1 DB retrieval tool (`recall_last_session`) for history lookup |
+| Agentic Loop (Plan/Act/Observe) | `backend/app/agent/loop.py` | 46–140 | Enforces max 4-round execution loop; dispatches Gemini tool calls to the deterministic engine |
+| Output Number Extraction | `backend/app/agent/guardrails.py` | 32–48 | Regex parser pulling all numbers and currencies from Gemini's final response |
+| Split Tolerance Regimes | `backend/app/agent/guardrails.py` | 76–90 | Validates scores (absolute ±1.0) and currency amounts (relative ±0.5%) separately |
+| Precision Sentence Stripping | `backend/app/agent/guardrails.py` | 120–145 | Strips only sentences containing hallucinated numbers, preserving valid numbers |
+| SEBI Disclaimer Injection | `backend/app/agent/guardrails.py` | 158–161 | Unconditionally appends regulatory disclaimer to all AI outputs |
+| Proactive APScheduler Jobs | `backend/app/agent/scheduler.py` | 24–75 | Monthly FOIR checks and February 80C deadline alerts |
+| `needs_replan` Context Injection | `backend/app/agent/memory.py` | 89–130 | Forces Gemini to re-run tools if user profile changes ≥ 10% |
+
 ## 2. API CONTRACT & VALIDATION (Type Safety, No Data Leakage)
 
 | Criterion | File | Lines | What It Does |
