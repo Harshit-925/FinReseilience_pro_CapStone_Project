@@ -1,4 +1,4 @@
-import { getAuthToken } from './client';
+import pb from "./pocketbase";
 import type { HouseholdInput } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
@@ -45,9 +45,9 @@ export async function postChatMessage(payload: ChatRequestPayload): Promise<Chat
     'Content-Type': 'application/json',
   };
   
-  const token = getAuthToken();
+  const token = pb.authStore.token;
   if (token) {
-    headers['Authorization'] = token;
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
   const response = await fetch(`${API_BASE}/chat`, {
@@ -68,9 +68,9 @@ export async function postWhatIf(payload: WhatIfRequestPayload): Promise<any> {
     'Content-Type': 'application/json',
   };
   
-  const token = getAuthToken();
+  const token = pb.authStore.token;
   if (token) {
-    headers['Authorization'] = token;
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
   const response = await fetch(`${API_BASE}/whatif`, {
@@ -87,18 +87,41 @@ export async function postWhatIf(payload: WhatIfRequestPayload): Promise<any> {
 }
 
 export async function getNotifications(): Promise<NotificationPayload[]> {
-  const token = getAuthToken();
+  const token = pb.authStore.token;
   if (!token) return [];
 
   const response = await fetch(`${API_BASE}/notifications`, {
     method: 'GET',
     headers: {
-      'Authorization': token,
+      'Authorization': `Bearer ${token}`,
     },
   });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch notifications: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export interface ChatSession {
+  session_id: string;
+  created: string;
+}
+
+export async function getChatSessions(): Promise<ChatSession[]> {
+  const token = pb.authStore.token;
+  if (!token) return [];
+
+  const response = await fetch(`${API_BASE}/chat/sessions`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch chat sessions: ${response.statusText}`);
   }
 
   return response.json();

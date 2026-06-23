@@ -53,7 +53,8 @@ function Toggle<T extends string>({ options, value, onChange }: { options: { lab
 
 export default function InputForm() {
   const [form, setForm] = useState<HouseholdInput>(DEMO);
-  const { analyze, isLoading } = useAppStore();
+  const [formError, setFormError] = useState<string | null>(null);
+  const { analyze, isLoading, error: apiError } = useAppStore();
 
   const set = <K extends keyof HouseholdInput>(key: K, val: HouseholdInput[K]) =>
     setForm(p => ({ ...p, [key]: val }));
@@ -70,7 +71,13 @@ export default function InputForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.monthly_income <= 0) { toast.error("Monthly income must be positive"); return; }
+    setFormError(null);
+    if (form.monthly_income <= 0) {
+      const err = "Monthly income must be positive";
+      setFormError(err);
+      toast.error(err);
+      return;
+    }
     try { await analyze(form); }
     catch { toast.error("Analysis failed — please try again"); }
   };
@@ -251,6 +258,14 @@ export default function InputForm() {
             </div>
           ))}
         </div>
+
+        {/* Errors */}
+        {(formError || apiError) && (
+          <div style={{ marginBottom: 16, padding: "12px 16px", background: "#fff5f5", border: "1px solid #ffe3e3", borderRadius: 6, color: "var(--c-error)", fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>error</span>
+            {formError || apiError}
+          </div>
+        )}
 
         {/* Submit */}
         <button type="submit" disabled={isLoading} className="btn-primary" style={{ width: "100%", padding: "15px 24px", fontSize: 16, borderRadius: 6, justifyContent: "center" }}>

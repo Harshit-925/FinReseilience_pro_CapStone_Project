@@ -17,8 +17,9 @@ class Settings(BaseSettings):
     environment: str = "development"
     use_ai: bool = True
 
-    # Gemini
+    # Gemini & OpenRouter
     gemini_api_key: str = ""
+    openrouter_api_key: str = ""
 
     # PocketBase
     pocketbase_url: str = "http://localhost:8090"

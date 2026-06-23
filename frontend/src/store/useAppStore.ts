@@ -30,6 +30,7 @@ export const useAppStore = create<AppState>((set) => ({
     } catch (err) {
       const message = err instanceof Error ? err.message : "Analysis failed";
       set({ error: message, isLoading: false });
+      throw err;
     }
   },
 

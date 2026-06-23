@@ -1,34 +1,72 @@
 import React, { useState, useRef, useEffect } from "react";
 import { postChatMessage } from "../api/chat";
-import type { ChatResponsePayload, ToolResult } from "../api/chat";
+import type { ChatResponsePayload } from "../api/chat";
 import type { HouseholdInput } from "../types";
-import { Send, Bot, User, Wrench, ShieldAlert } from "lucide-react";
+import { Send, Bot, User, Wrench, History, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { useChatStore } from "../store/useChatStore";
+import type { ChatMessage } from "../store/useChatStore";
+import { getChatSessions } from "../api/chat";
+import type { ChatSession } from "../api/chat";
 
 interface ChatPanelProps {
   sessionId: string;
   profileSnapshot?: HouseholdInput;
+  onClose?: () => void;
+  style?: React.CSSProperties;
 }
 
-interface Message {
-  id: string;
-  role: "user" | "agent";
-  text: string;
-  toolCalls?: string[];
-  toolResults?: ToolResult[];
-}
 
-export default function ChatPanel({ sessionId, profileSnapshot }: ChatPanelProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      role: "agent",
-      text: "Hello! I'm your deterministic FinResilience agent. I can help you understand your financial health, simulate scenarios, or optimize your debt and tax strategies. What would you like to know?",
-    }
-  ]);
+
+export default function ChatPanel({ sessionId, profileSnapshot, onClose, style }: ChatPanelProps) {
+  const { messages, setMessages, addMessage, sessionId: currentSessionId, setSessionId } = useChatStore();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
+
+  // Initialize session ID if not set
+  useEffect(() => {
+    if (currentSessionId === "anon" && sessionId !== "anon") {
+      setSessionId(sessionId);
+    }
+  }, [sessionId, currentSessionId, setSessionId]);
+
+  // Welcome message if empty
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMessages([
+        {
+          id: "welcome",
+          role: "agent",
+          content: "Hello! I'm your deterministic FinResilience agent. I can help you understand your financial health, simulate scenarios, or optimize your debt and tax strategies. What would you like to know?",
+        }
+      ]);
+    }
+  }, [messages, setMessages]);
+
+  const loadHistory = async () => {
+    try {
+      const data = await getChatSessions();
+      setSessions(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleToggleHistory = () => {
+    if (!showHistory) {
+      loadHistory();
+    }
+    setShowHistory(!showHistory);
+  };
+
+  const handleSelectSession = (id: string) => {
+    setSessionId(id);
+    setMessages([]); // We'd load actual history here if we had an endpoint to fetch messages, for now it clears to start fresh
+    setShowHistory(false);
+  };
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -37,41 +75,41 @@ export default function ChatPanel({ sessionId, profileSnapshot }: ChatPanelProps
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    const userMsg: Message = {
+    const userMsg: ChatMessage = {
       id: Date.now().toString(),
       role: "user",
-      text: input.trim(),
+      content: input.trim(),
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    addMessage(userMsg);
     setInput("");
     setIsLoading(true);
 
     try {
       const response: ChatResponsePayload = await postChatMessage({
-        message: userMsg.text,
-        session_id: sessionId,
+        message: userMsg.content,
+        session_id: currentSessionId,
         profile_snapshot: profileSnapshot,
       });
 
-      const agentMsg: Message = {
+      // The response.reply already handles the text.
+      // We are just storing it in the store
+      const agentMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "agent",
-        text: response.reply,
+        content: response.reply,
         toolCalls: response.tool_calls_made,
         toolResults: response.tool_results,
       };
 
-      setMessages((prev) => [...prev, agentMsg]);
+      addMessage(agentMsg);
     } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          role: "agent",
-          text: "⚠️ Sorry, I encountered an error connecting to the engine. Please try again.",
-        }
-      ]);
+      addMessage({
+        id: (Date.now() + 1).toString(),
+        role: "agent",
+        content: "⚠️ Sorry, I encountered an error connecting to the engine. Please try again.",
+        isError: true,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -85,12 +123,69 @@ export default function ChatPanel({ sessionId, profileSnapshot }: ChatPanelProps
   };
 
   return (
-    <div className="card" style={{ display: "flex", flexDirection: "column", height: 600, overflow: "hidden" }}>
+    <div className="card" style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden", ...style }}>
       {/* Header */}
-      <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--c-border)", background: "var(--c-bg)", display: "flex", alignItems: "center", gap: 10 }}>
-        <Bot size={20} color="var(--c-emerald)" />
-        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "var(--c-navy)" }}>Agentic Chat</h3>
+      <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--c-border)", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <Bot size={20} color="var(--c-emerald)" />
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "var(--c-navy)" }}>Agentic Chat</h3>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={handleToggleHistory} title="Chat History" style={{ background: "none", border: "none", color: "var(--c-muted)", cursor: "pointer", display: "flex", alignItems: "center" }}>
+            <History size={20} />
+          </button>
+          {onClose && (
+            <button onClick={onClose} style={{ background: "none", border: "none", color: "var(--c-muted)", cursor: "pointer", display: "flex", alignItems: "center" }}>
+              <X size={20} />
+            </button>
+          )}
+        </div>
       </div>
+
+      {showHistory && (
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 20, display: "flex", flexDirection: "column" }}>
+          {/* Backdrop for click-outside */}
+          <div 
+            onClick={() => setShowHistory(false)} 
+            style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.2)", backdropFilter: "blur(2px)", zIndex: -1 }} 
+          />
+          
+          <div style={{ background: "var(--c-white)", width: "100%", height: "100%", display: "flex", flexDirection: "column", animation: "slideInTop 0.2s ease-out" }}>
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--c-border)", background: "var(--c-bg)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ fontWeight: 600, color: "var(--c-navy)", display: "flex", alignItems: "center", gap: 8 }}>
+                <History size={18} />
+                <span>Past Sessions</span>
+              </div>
+              <button onClick={() => setShowHistory(false)} style={{ background: "none", border: "none", color: "var(--c-muted)", cursor: "pointer", display: "flex", alignItems: "center" }}>
+                <X size={20} />
+              </button>
+            </div>
+            <div style={{ flex: 1, overflowY: "auto", padding: "12px 0" }}>
+              {sessions.length === 0 ? (
+                <div style={{ padding: 20, color: "var(--c-muted)", textAlign: "center", fontSize: 14 }}>No previous sessions found.</div>
+              ) : (
+                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                  {sessions.map(s => (
+                    <li key={s.session_id}>
+                      <button 
+                        onClick={() => handleSelectSession(s.session_id)} 
+                        className="history-session-btn"
+                        style={{ width: "100%", padding: "12px 20px", background: "none", border: "none", borderBottom: "1px solid rgba(0,0,0,0.05)", textAlign: "left", cursor: "pointer", transition: "all 0.2s" }}
+                      >
+                        <div style={{ fontWeight: 500, color: "var(--c-navy)", marginBottom: 4, display: "flex", justifyContent: "space-between" }}>
+                          <span>Session {s.session_id.slice(0,8)}</span>
+                          <span style={{ fontSize: 12, color: "var(--c-emerald)", fontWeight: 600 }}>Resume</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: "var(--c-muted)" }}>{new Date(s.created).toLocaleString()}</div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Messages */}
       <div style={{ flex: 1, overflowY: "auto", padding: 20, display: "flex", flexDirection: "column", gap: 20 }}>
@@ -104,13 +199,15 @@ export default function ChatPanel({ sessionId, profileSnapshot }: ChatPanelProps
               <div style={{
                 padding: "12px 16px",
                 borderRadius: 12,
-                background: msg.role === "user" ? "var(--c-emerald-lt)" : "var(--c-bg)",
-                color: "var(--c-navy)",
+                background: msg.isError ? "var(--c-coral-lt)" : (msg.role === "user" ? "var(--c-emerald-lt)" : "var(--c-bg)"),
+                color: msg.isError ? "var(--c-coral)" : "var(--c-navy)",
                 fontSize: 14,
                 lineHeight: 1.5,
                 border: msg.role === "user" ? "none" : "1px solid var(--c-border)",
               }}>
-                <ReactMarkdown className="markdown-body" style={{ margin: 0 }}>{msg.text}</ReactMarkdown>
+                <div className="markdown-body" style={{ margin: 0 }}>
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                </div>
               </div>
 
               {/* Tool Calls Disclosure */}
@@ -135,12 +232,6 @@ export default function ChatPanel({ sessionId, profileSnapshot }: ChatPanelProps
           </div>
         )}
         <div ref={endOfMessagesRef} />
-      </div>
-
-      {/* Disclaimer */}
-      <div style={{ padding: "8px 20px", background: "#fff5f5", borderTop: "1px solid #ffe3e3", display: "flex", gap: 8, alignItems: "center", fontSize: 11, color: "#e03131" }}>
-        <ShieldAlert size={14} style={{ flexShrink: 0 }} />
-        <span style={{ lineHeight: 1.3 }}>Educational analysis only — not regulated financial advice under SEBI/RBI guidelines. Consult a SEBI-registered investment advisor for personalised guidance.</span>
       </div>
 
       {/* Input Area */}
@@ -181,6 +272,11 @@ export default function ChatPanel({ sessionId, profileSnapshot }: ChatPanelProps
         .markdown-body p { margin-top: 0; margin-bottom: 0.5em; }
         .markdown-body p:last-child { margin-bottom: 0; }
         .markdown-body strong { font-weight: 600; color: var(--c-navy); }
+        .history-session-btn:hover { background: var(--c-emerald-lt) !important; }
+        @keyframes slideInTop {
+          from { transform: translateY(-10px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
       `}</style>
     </div>
   );

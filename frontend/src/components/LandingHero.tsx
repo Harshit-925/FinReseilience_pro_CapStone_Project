@@ -1,14 +1,21 @@
-/**
- * LandingHero — Premium landing page based on Stitch "Institutional Matte" design system.
- * Light-themed, warm ivory background, emerald accents, Inter typography.
- */
+import ThemeToggle from "./ThemeToggle";
+import UserProfileMenu from "./UserProfileMenu";
+
+interface User {
+  email: string;
+}
 
 interface LandingHeroProps {
   onGetStarted: () => void;
   onLoginClick: () => void;
+  isAuthenticated: boolean;
+  user: User | null;
+  onLogout: () => void;
+  onPricingClick: () => void;
+  onNewsClick: () => void;
 }
 
-export default function LandingHero({ onGetStarted, onLoginClick }: LandingHeroProps) {
+export default function LandingHero({ onGetStarted, onLoginClick, isAuthenticated, user, onLogout, onPricingClick, onNewsClick }: LandingHeroProps) {
   return (
     <div style={{ minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
 
@@ -16,29 +23,57 @@ export default function LandingHero({ onGetStarted, onLoginClick }: LandingHeroP
       <nav className="topnav">
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           {/* Logo */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 800, fontSize: 18, color: "var(--c-navy)", letterSpacing: "-0.02em" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 800, fontSize: 18, color: "var(--c-text)", letterSpacing: "-0.02em" }}>
             <span className="material-symbols-outlined" style={{ color: "var(--c-emerald)", fontSize: 22 }}>account_balance</span>
             FinResilience <span style={{ color: "var(--c-emerald)" }}>Pro</span>
           </div>
 
           {/* Nav Links */}
-          <div style={{ display: "flex", alignItems: "center", gap: 32 }} className="hidden-mobile">
-            {["Platform", "Solutions", "Pricing"].map(link => (
-              <a key={link} style={{ fontSize: 14, fontWeight: 500, color: "var(--c-muted)", textDecoration: "none", cursor: "pointer" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "var(--c-navy)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "var(--c-muted)")}
-                href="#">{link}</a>
-            ))}
-          </div>
+            <nav style={{ display: "flex", gap: 32 }} className="hidden-mobile">
+              {["Platform"].map(link => (
+                <a key={link} href={`#${link.toLowerCase()}`} style={{ color: "var(--c-text)", fontWeight: 600, fontSize: 14, textDecoration: "none", transition: "color 0.15s" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--c-emerald)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "var(--c-text)")}
+                >{link}</a>
+              ))}
+              <button 
+                onClick={onNewsClick}
+                style={{ color: "var(--c-text)", fontWeight: 600, fontSize: 14, background: "none", border: "none", cursor: "pointer", padding: 0, transition: "color 0.15s" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "var(--c-emerald)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "var(--c-text)")}
+              >
+                News
+              </button>
+              <button 
+                onClick={onPricingClick}
+                style={{ color: "var(--c-text)", fontWeight: 600, fontSize: 14, background: "none", border: "none", cursor: "pointer", padding: 0, transition: "color 0.15s" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "var(--c-emerald)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "var(--c-text)")}
+              >
+                Pricing
+              </button>
+            </nav>
 
-          {/* Auth Buttons */}
+          {/* Auth Buttons + Theme Toggle */}
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button type="button" onClick={onLoginClick} className="btn-ghost" style={{ fontSize: 14, padding: "8px 18px" }}>
-              Sign In
-            </button>
-            <button type="button" onClick={onGetStarted} className="btn-primary" style={{ fontSize: 14, padding: "9px 20px" }}>
-              Get Started Free
-            </button>
+            <ThemeToggle />
+            {isAuthenticated ? (
+              <>
+                <button type="button" onClick={onGetStarted} className="btn-ghost" style={{ fontSize: 14, padding: "8px 18px", display: "flex", alignItems: "center", gap: 6 }}>
+                  Dashboard
+                </button>
+                <UserProfileMenu user={user} onLogout={onLogout} onGoToDashboard={onGetStarted} showDashboardLink={true} />
+              </>
+            ) : (
+              <>
+                <button type="button" onClick={onLoginClick} className="btn-ghost" style={{ fontSize: 14, padding: "8px 18px" }}>
+                  Sign In
+                </button>
+                <button type="button" onClick={onGetStarted} className="btn-primary" style={{ fontSize: 14, padding: "9px 20px" }}>
+                  Get Started Free
+                </button>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -87,17 +122,17 @@ export default function LandingHero({ onGetStarted, onLoginClick }: LandingHeroP
             </div>
           </div>
 
-          {/* Right: Dashboard Preview Card */}
-          <div className="card animate-fade-up" style={{ padding: 0, overflow: "hidden", animationDelay: "0.1s" }}>
-            {/* Card Header */}
-            <div style={{ background: "#FAFAF8", borderBottom: "1px solid var(--c-border)", padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span className="text-label-caps">LIVE ALGORITHMIC OVERVIEW</span>
-              <div style={{ display: "flex", gap: 5 }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-emerald)" }} />
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-border)" }} />
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-border)" }} />
+            {/* Dashboard Preview Card */}
+            <div className="card animate-fade-up" style={{ padding: 0, overflow: "hidden", animationDelay: "0.1s" }}>
+              {/* Card Header */}
+              <div style={{ background: "var(--c-surface-alt, #FAFAF8)", borderBottom: "1px solid var(--c-border)", padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span className="text-label-caps">LIVE ALGORITHMIC OVERVIEW</span>
+                <div style={{ display: "flex", gap: 5 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-emerald)" }} />
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-border)" }} />
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-border)" }} />
+                </div>
               </div>
-            </div>
 
             <div style={{ padding: 24 }}>
               {/* Main Metric */}
@@ -115,7 +150,7 @@ export default function LandingHero({ onGetStarted, onLoginClick }: LandingHeroP
               {/* 2-Column Metric Grid */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
                 {/* Health Score */}
-                <div style={{ background: "#FAFAF8", border: "1px solid var(--c-border)", borderRadius: 6, padding: 14 }}>
+                <div style={{ background: "var(--c-surface-alt, #FAFAF8)", border: "1px solid var(--c-border)", borderRadius: 6, padding: 14 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
                     <span className="material-symbols-outlined" style={{ fontSize: 16, color: "var(--c-emerald)" }}>health_and_safety</span>
                     <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--c-muted)" }}>Health Score</span>
@@ -127,12 +162,12 @@ export default function LandingHero({ onGetStarted, onLoginClick }: LandingHeroP
                 </div>
 
                 {/* Debt Freedom */}
-                <div style={{ background: "#FAFAF8", border: "1px solid var(--c-border)", borderRadius: 6, padding: 14 }}>
+                <div style={{ background: "var(--c-surface-alt, #FAFAF8)", border: "1px solid var(--c-border)", borderRadius: 6, padding: 14 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: 16, color: "var(--c-navy)" }}>timer</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: 16, color: "var(--c-text)" }}>timer</span>
                     <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--c-muted)" }}>Debt Freedom</span>
                   </div>
-                  <div style={{ fontSize: 26, fontWeight: 700, color: "var(--c-navy)", letterSpacing: "-0.02em" }}>
+                  <div style={{ fontSize: 26, fontWeight: 700, color: "var(--c-text)", letterSpacing: "-0.02em" }}>
                     14 <span style={{ fontSize: 14, fontWeight: 500, color: "var(--c-muted)" }}>mos</span>
                   </div>
                   <p style={{ fontSize: 11, color: "var(--c-muted)", margin: "4px 0 0" }}>Accelerated timeline</p>
@@ -164,14 +199,14 @@ export default function LandingHero({ onGetStarted, onLoginClick }: LandingHeroP
       </section>
 
       {/* ── SOCIAL PROOF STRIP ── */}
-      <section style={{ borderTop: "1px solid var(--c-border)", borderBottom: "1px solid var(--c-border)", background: "var(--c-white)", padding: "28px 24px" }}>
+      <section style={{ borderTop: "1px solid var(--c-border)", borderBottom: "1px solid var(--c-border)", background: "var(--c-surface)", padding: "28px 24px" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", textAlign: "center" }}>
-          <p style={{ fontSize: 18, fontWeight: 700, color: "var(--c-navy)", margin: "0 0 16px", letterSpacing: "-0.01em" }}>
+          <p style={{ fontSize: 18, fontWeight: 700, color: "var(--c-text)", margin: "0 0 16px", letterSpacing: "-0.01em" }}>
             10,000+ users saved <span style={{ color: "var(--c-emerald)" }}>₹2.4 Crore</span> in interest collectively
           </p>
           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 40, opacity: 0.5, flexWrap: "wrap" }}>
             {["QuantEdge Capital", "VertexCap", "StrataWealth", "OmniFinancial"].map(name => (
-              <span key={name} style={{ fontSize: 14, fontWeight: 700, color: "var(--c-navy)", letterSpacing: "-0.01em" }}>{name}</span>
+              <span key={name} style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)", letterSpacing: "-0.01em" }}>{name}</span>
             ))}
           </div>
         </div>
@@ -231,9 +266,9 @@ export default function LandingHero({ onGetStarted, onLoginClick }: LandingHeroP
       </section>
 
       {/* ── TESTIMONIALS ── */}
-      <section style={{ background: "var(--c-white)", borderTop: "1px solid var(--c-border)", borderBottom: "1px solid var(--c-border)", padding: "72px 24px" }}>
+      <section style={{ background: "var(--c-surface)", borderTop: "1px solid var(--c-border)", borderBottom: "1px solid var(--c-border)", padding: "72px 24px" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-          <h2 style={{ textAlign: "center", fontSize: 32, fontWeight: 800, color: "var(--c-navy)", margin: "0 0 48px", letterSpacing: "-0.02em" }}>
+          <h2 style={{ textAlign: "center", fontSize: 32, fontWeight: 800, color: "var(--c-text)", margin: "0 0 48px", letterSpacing: "-0.02em" }}>
             Institutional Results for Individuals
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
@@ -242,19 +277,19 @@ export default function LandingHero({ onGetStarted, onLoginClick }: LandingHeroP
               { initials: "SM", name: "Sneha M.", role: "Surgeon, Mumbai", quote: "Finally, a tool that treats personal finance with the seriousness it deserves. No gimmicks, just cold, hard mathematical optimization.", stars: 5 },
               { initials: "VK", name: "Vikram K.", role: "Entrepreneur, Delhi", quote: "The tax optimization insights alone paid for the pro subscription in the first month. It's like having a CFO for your personal wealth.", stars: 5 },
             ].map(({ initials, name, role, quote, stars }) => (
-              <div key={name} style={{ background: "#FAFAF8", border: "1px solid var(--c-border)", borderRadius: 8, padding: 24 }}>
+              <div key={name} style={{ background: "var(--c-surface-alt, #FAFAF8)", border: "1px solid var(--c-border)", borderRadius: 8, padding: 24 }}>
                 <div style={{ display: "flex", gap: 3, marginBottom: 14 }}>
                   {Array.from({ length: stars }).map((_, i) => (
                     <span key={i} className="material-symbols-outlined" style={{ fontSize: 16, color: "#F59E0B", fontVariationSettings: "'FILL' 1" }}>star</span>
                   ))}
                 </div>
-                <p style={{ fontSize: 14, color: "var(--c-navy-mid)", lineHeight: 1.7, margin: "0 0 20px", fontStyle: "italic" }}>"{quote}"</p>
+                <p style={{ fontSize: 14, color: "var(--c-text-muted)", lineHeight: 1.7, margin: "0 0 20px", fontStyle: "italic" }}>"{quote}"</p>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--c-navy)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff" }}>
+                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--c-navy-mid)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff" }}>
                     {initials}
                   </div>
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-navy)" }}>{name}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)" }}>{name}</div>
                     <div style={{ fontSize: 12, color: "var(--c-muted)" }}>{role}</div>
                   </div>
                 </div>
@@ -282,17 +317,17 @@ export default function LandingHero({ onGetStarted, onLoginClick }: LandingHeroP
       </section>
 
       {/* ── FOOTER ── */}
-      <footer style={{ borderTop: "1px solid var(--c-border)", background: "var(--c-white)", padding: "32px 24px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: 16, color: "var(--c-navy)" }}>
+      <footer style={{ borderTop: "1px solid var(--c-border)", background: "var(--c-surface)", padding: "32px 24px" }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16, paddingRight: 80 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: 16, color: "var(--c-text)" }}>
             <span className="material-symbols-outlined" style={{ color: "var(--c-emerald)", fontSize: 18 }}>account_balance</span>
             FinResilience Pro
           </div>
           <div style={{ fontSize: 13, color: "var(--c-muted)" }}>© 2024 FinResilience Pro. All rights reserved.</div>
           <div style={{ display: "flex", gap: 20 }}>
             {["Privacy", "Terms", "Security", "Contact"].map(link => (
-              <a key={link} href="#" style={{ fontSize: 13, color: "var(--c-muted)", textDecoration: "none" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "var(--c-navy)")}
+              <a key={link} href={`/${link.toLowerCase()}.html`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--c-muted)", textDecoration: "none", transition: "color 0.15s" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "var(--c-text)")}
                 onMouseLeave={e => (e.currentTarget.style.color = "var(--c-muted)")}
               >{link}</a>
             ))}

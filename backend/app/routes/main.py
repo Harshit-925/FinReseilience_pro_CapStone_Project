@@ -196,18 +196,31 @@ async def chat(
         
         # Build context
         needs_replan = False
-        if memory and payload.profile_snapshot:
-            needs_replan = memory.detect_needs_replan(
-                current_profile=payload.profile_snapshot.model_dump(),
-                last_session=last_session,
+        snapshot_context = ""
+        if payload.profile_snapshot:
+            # Inject profile_snapshot numbers into context
+            snapshot_context = (
+                f"\n\nCURRENT FINANCIAL SNAPSHOT:\n"
+                f"- Income: ₹{payload.profile_snapshot.monthly_income}\n"
+                f"- Expenses: ₹{payload.profile_snapshot.monthly_expenses}\n"
+                f"- Debts Count: {len(payload.profile_snapshot.debts)}\n"
             )
+            if memory:
+                needs_replan = memory.detect_needs_replan(
+                    current_profile=payload.profile_snapshot.model_dump(),
+                    last_session=last_session,
+                )
             
-        memory_context = memory.build_context_string(last_session, needs_replan) if memory else "No previous session found."
+        base_memory_context = memory.build_context_string(last_session, needs_replan) if memory else "No previous session found."
+        memory_context = base_memory_context + snapshot_context
+        
+        chat_history = await memory.get_chat_history(payload.session_id, limit=20) if memory else []
         
         # Run agent loop
         result = await run_agent_turn(
             user_message=payload.message,
             memory_context=memory_context,
+            chat_history=chat_history,
             profile_snapshot=payload.profile_snapshot.model_dump() if payload.profile_snapshot else None,
             user_id=user_id,
             user_token=user_token,
@@ -232,6 +245,54 @@ async def chat(
     except Exception as exc:
         logger.error("Chat failed: %s", type(exc).__name__)
         raise HTTPException(status_code=500, detail="Chat failed")
+
+@router.get("/chat/sessions")
+@limiter.limit("30/minute")
+async def get_chat_sessions(
+    request: Request,
+    user: dict[str, Any] = Depends(get_current_user),
+) -> list[dict[str, Any]]:
+    """Return unique chat sessions for the authenticated user."""
+    try:
+        user_token = user.get("token", "")
+        settings = get_settings()
+        
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(
+                f"{settings.pocketbase_url}/api/collections/chat_sessions/records",
+                params={
+                    "filter": f'user_id="{user["id"]}"',
+                    "sort": "-created",
+                    "perPage": 100,
+                },
+                headers={
+                    "Authorization": user_token,
+                    "Content-Type": "application/json",
+                },
+            )
+            
+        if resp.status_code != 200:
+            return []
+            
+        items = resp.json().get("items", [])
+        
+        # Deduplicate by session_id
+        seen = set()
+        unique_sessions = []
+        for item in items:
+            sid = item.get("session_id")
+            if sid and sid not in seen:
+                seen.add(sid)
+                unique_sessions.append({
+                    "session_id": sid,
+                    "created": item.get("created"),
+                })
+                
+        return unique_sessions
+
+    except Exception as exc:
+        logger.error("Fetching chat sessions failed: %s", type(exc).__name__)
+        return []
 
 
 @router.post("/whatif", response_model=WhatIfResponse)

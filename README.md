@@ -18,7 +18,9 @@ This platform evaluates debt using the **Avalanche Method**, optimizes domestic 
 - **Deterministic Math Engine**: Raw Python algorithms for debt scheduling, avalanche methodology, and tax shielding. Zero LLM hallucinations in the core math.
 - **Privacy-First Architecture**: User financial structures are processed in-memory and are never used to train external LLMs.
 - **AI Institutional Intelligence**: Uses Google Gemini 2.5 Flash as an *isolated narrative layer* to convert the engine's hard numbers into personalized, plain-language financial advice.
-- **Accessible & Ambient UI**: Clean, responsive layout with ambient gradients, structured cards, WCAG 2.1 AA compliant, and real-time form processing.
+- **Real-Time Market Intelligence**: Aggregates live business news from BBC Business, Financial Times, and WSJ using a dynamic, paginated feed with auto-refresh and intelligent deduplication.
+- **Premium Subscription & Payment Flows**: Interactive pricing tiers (Free, ₹500, ₹1000) with a premium simulated checkout experience supporting UPI, Cards, and Net Banking.
+- **Accessible & Ambient UI**: Clean, responsive layout with ambient animations, structured cards, WCAG 2.1 AA compliant, and real-time form processing.
 - **Offline Resilience**: Built-in fallback circuits ensure you get your math even if the AI narrative generator goes offline or the API key is missing.
 
 ---
@@ -88,10 +90,11 @@ graph TD
 | Component | Technology | Description |
 |-----------|------------|-------------|
 | **Frontend** | React 18, TypeScript, Vite | Fast, modern UI powered by Zustand for state management and Framer Motion for micro-interactions. |
-| **Styling** | Vanilla CSS, Tailwind, Lucide | Ambient gradients and strictly non-glassmorphism elevated cards. |
+| **Styling** | Vanilla CSS, Tailwind, Lucide | Ambient gradients, dark/light theme support, and premium glassmorphism/elevated cards. |
 | **Backend** | FastAPI, Python 3.11+, Pydantic | High-performance, async backend for deterministic financial calculations. |
 | **Database** | PocketBase (SQLite) | Embedded, high-performance local database for user auth and data retention. |
 | **AI Integration** | Google Gemini API (httpx) | Asynchronous context-aware AI narrative generation. |
+| **News Integration**| rss2json API | Real-time, keyless RSS parsing for multi-source financial news aggregation. |
 
 ---
 

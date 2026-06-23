@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { postWhatIf } from "../api/chat";
 import type { HouseholdInput } from "../types";
-import { TrendingUp, TrendingDown, ArrowRight, Activity, Percent, Calendar } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity, Calendar } from "lucide-react";
 
 interface WhatIfPanelProps {
   baseProfile: HouseholdInput;

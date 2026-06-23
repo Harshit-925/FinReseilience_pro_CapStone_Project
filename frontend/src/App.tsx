@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Toaster, toast } from "sonner";
-import { LogOut, Bell } from "lucide-react";
+import { Bell } from "lucide-react";
 import { useAuthStore } from "./store/useAuthStore";
 import { useAppStore } from "./store/useAppStore";
+import { useThemeStore } from "./store/useThemeStore";
 import AmbientGradient from "./components/AmbientGradient";
 import LandingHero from "./components/LandingHero";
-import LoginForm from "./components/LoginForm";
-import SignupForm from "./components/SignupForm";
+import AuthPage from "./components/AuthPage";
 import InputForm from "./components/InputForm";
 import ResultsPanel from "./components/ResultsPanel";
 import HistoryChart from "./components/HistoryChart";
@@ -15,18 +15,32 @@ import ReportExport from "./components/ReportExport";
 import DataRetentionNotice from "./components/DataRetentionNotice";
 import ChatPanel from "./components/ChatPanel";
 import WhatIfPanel from "./components/WhatIfPanel";
+import FloatingChatWidget from "./components/FloatingChatWidget";
+import ThemeToggle from "./components/ThemeToggle";
+import UserProfileMenu from "./components/UserProfileMenu";
+import PaymentPage from "./components/PaymentPage";
+import PricingPage from "./components/PricingPage";
+import NewsPage from "./components/NewsPage";
 import { getNotifications } from "./api/chat";
 import type { NotificationPayload } from "./api/chat";
 
-type View = "landing" | "login" | "signup" | "dashboard";
+type View = "landing" | "login" | "signup" | "dashboard" | "payment" | "pricing" | "news";
+export type PlanTier = { name: string; price: number; interval: string };
 type DashboardTab = "analysis" | "agent";
 
 export default function App() {
   const { isAuthenticated, user, logout } = useAuthStore();
   const { result, lastInput } = useAppStore();
+  const { theme } = useThemeStore();
   const [view, setView] = useState<View>("landing");
+  const [selectedPlan, setSelectedPlan] = useState<PlanTier | null>(null);
   const [dashboardTab, setDashboardTab] = useState<DashboardTab>("analysis");
   const [notifications, setNotifications] = useState<NotificationPayload[]>([]);
+
+  // Apply theme to <html> on every render so SSR/refresh works
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   // Track whether the user was previously authenticated so we can
   // detect a logout event. We must NEVER snap back to landing just
@@ -88,17 +102,20 @@ export default function App() {
       {/* Main Content */}
       <main id="main-content">
 
-        {/* Top Navigation Bar — visible on all views except the landing hero */}
-        {view !== "landing" && (
+        {/* Top Navigation Bar — hidden on landing (it has own nav) and auth pages (full-screen) */}
+        {view !== "landing" && view !== "login" && view !== "signup" && view !== "payment" && (
           <header className="topnav" style={{ position: "sticky", top: 0, zIndex: 100 }}>
             <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <button type="button" onClick={() => setView("landing")} aria-label="Go to home"
-                style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 800, fontSize: 17, color: "var(--c-navy)", background: "none", border: "none", cursor: "pointer", letterSpacing: "-0.02em", padding: 0 }}>
+                style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 800, fontSize: 17, color: "var(--c-text)", background: "none", border: "none", cursor: "pointer", letterSpacing: "-0.02em", padding: 0 }}>
                 <span className="material-symbols-outlined" style={{ color: "var(--c-emerald)", fontSize: 20 }}>account_balance</span>
                 FinResilience <span style={{ color: "var(--c-emerald)" }}>Pro</span>
               </button>
 
               <nav style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                {/* Theme toggle */}
+                <ThemeToggle />
+
                 {isAuthenticated ? (
                   <>
                     <button type="button" onClick={handleShowNotifications} className="btn-ghost relative" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36, padding: 0, borderRadius: "50%" }}>
@@ -107,10 +124,7 @@ export default function App() {
                         <span style={{ position: "absolute", top: 6, right: 6, width: 8, height: 8, background: "var(--c-coral)", borderRadius: "50%" }}></span>
                       )}
                     </button>
-                    <span style={{ fontSize: 13, color: "var(--c-muted)", fontWeight: 500, marginLeft: 8 }}>{user?.email}</span>
-                    <button type="button" onClick={logout} className="btn-ghost" style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", fontSize: 13 }}>
-                      <LogOut size={14} /> Log Out
-                    </button>
+                    <UserProfileMenu user={user} onLogout={logout} />
                   </>
                 ) : (
                   <>
@@ -132,21 +146,47 @@ export default function App() {
           <LandingHero
             onGetStarted={() => setView("dashboard")}
             onLoginClick={() => setView("login")}
+            onPricingClick={() => setView("pricing")}
+            onNewsClick={() => setView("news")}
+            isAuthenticated={isAuthenticated}
+            user={user}
+            onLogout={logout}
           />
         )}
 
-        {/* ── LOGIN ── */}
-        {view === "login" && (
-          <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 24px" }}>
-            <LoginForm onSwitchToSignup={() => setView("signup")} />
-          </div>
+        {/* ── LOGIN / SIGNUP ── — full-screen split panel, no header overlay */}
+        {(view === "login" || view === "signup") && (
+          <AuthPage
+            initialMode={view === "signup" ? "signup" : "login"}
+            onSwitchMode={(mode) => setView(mode)}
+          />
         )}
 
-        {/* ── SIGNUP ── */}
-        {view === "signup" && (
-          <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 24px" }}>
-            <SignupForm onSwitchToLogin={() => setView("login")} />
-          </div>
+        {/* ── PRICING PAGE ── */}
+        {view === "pricing" && (
+          <PricingPage 
+            onBack={() => setView("landing")}
+            onSubscribe={(plan) => {
+              setSelectedPlan(plan);
+              setView("payment");
+            }}
+          />
+        )}
+
+        {/* ── NEWS PAGE ── */}
+        {view === "news" && (
+          <NewsPage onBack={() => setView("landing")} />
+        )}
+
+        {/* ── PAYMENT PAGE ── */}
+        {view === "payment" && (
+          <PaymentPage 
+            plan={selectedPlan}
+            onBack={() => setView("landing")}
+            onSuccess={() => {
+              setView(isAuthenticated ? "dashboard" : "signup");
+            }}
+          />
         )}
 
         {/* ── DASHBOARD ── */}
@@ -249,7 +289,7 @@ export default function App() {
                   {lastInput && (
                     <WhatIfPanel baseProfile={lastInput} />
                   )}
-                  <ChatPanel sessionId={isAuthenticated ? user?.id || "anon" : "anon"} profileSnapshot={lastInput || undefined} />
+                  <ChatPanel sessionId={isAuthenticated ? user?.id || "anon" : "anon"} profileSnapshot={lastInput || undefined} style={{ height: 600 }} />
                 </div>
               </div>
             )}
@@ -261,6 +301,9 @@ export default function App() {
         )}
 
       </main>
+
+      {/* Global AI Agent Widget */}
+      <FloatingChatWidget sessionId={isAuthenticated ? user?.id || "anon" : "anon"} profileSnapshot={lastInput || undefined} />
     </div>
   );
 }

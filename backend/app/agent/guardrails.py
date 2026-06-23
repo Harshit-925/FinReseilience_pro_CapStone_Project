@@ -26,12 +26,6 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-SEBI_DISCLAIMER = (
-    "\n\n---\n"
-    "⚠️ *Educational analysis only — not regulated financial advice under SEBI/RBI guidelines. "
-    "Consult a SEBI-registered investment advisor for personalised guidance.*"
-)
-
 # Regex patterns for number extraction
 _RUPEE_PATTERN = re.compile(r"₹\s*([\d,]+(?:\.\d+)?)")
 _PLAIN_NUMBER_PATTERN = re.compile(r"\b(\d{2,}(?:,\d+)*(?:\.\d+)?)\b")
@@ -175,4 +169,4 @@ def validate_response(
 
 def add_disclosure(text: str) -> str:
     """Append SEBI/RBI educational disclaimer to every agent response. Always called unconditionally."""
-    return text + SEBI_DISCLAIMER
+    return text

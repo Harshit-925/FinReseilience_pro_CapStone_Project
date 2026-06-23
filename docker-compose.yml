@@ -11,7 +11,7 @@ services:
       - ./pb_public:/pb_public
       - ./pb_migrations:/pb_migrations
     restart: unless-stopped
-    command: ["serve", "--http=0.0.0.0:8090"]
+    command: ["serve", "--dir=/pb_data", "--publicDir=/pb_public", "--migrationsDir=/pb_migrations", "--http=0.0.0.0:8090"]
 
   backend:
     build:
@@ -23,6 +23,7 @@ services:
     environment:
       - POCKETBASE_URL=http://pocketbase:8090
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - ENVIRONMENT=production
     depends_on:
       - pocketbase

@@ -47,6 +47,7 @@ FALLBACK_RESPONSE = (
 async def run_agent_turn(
     user_message: str,
     memory_context: str,
+    chat_history: list[dict[str, Any]] | None = None,
     profile_snapshot: dict[str, Any] | None = None,
     user_id: str | None = None,
     user_token: str | None = None,
@@ -78,9 +79,18 @@ async def run_agent_turn(
     tool_calls_made: list[str] = []
 
     # Build conversation history for multi-round loop
-    conversation: list[dict[str, Any]] = [
+    conversation: list[dict[str, Any]] = []
+    if chat_history:
+        for msg in chat_history:
+            # We assume msg has 'user_message' and 'agent_reply' from PocketBase
+            if msg.get("user_message"):
+                conversation.append({"role": "user", "parts": [{"text": msg["user_message"]}]})
+            if msg.get("agent_reply"):
+                conversation.append({"role": "model", "parts": [{"text": msg["agent_reply"]}]})
+                
+    conversation.append(
         {"role": "user", "parts": [{"text": f"{system_context}\n\nUser question: {user_message}"}]}
-    ]
+    )
 
     try:
         for round_num in range(1, MAX_ROUNDS + 1):
@@ -172,7 +182,129 @@ async def run_agent_turn(
         }
 
     except Exception as exc:
-        logger.error("Agent loop failed: %s", type(exc).__name__)
+        logger.error("Agent loop failed (Gemini): %s", type(exc).__name__)
+        # Fallback to OpenRouter
+        return await _run_openrouter_fallback(user_message, memory_context, chat_history, user_id)
+
+async def _run_openrouter_fallback(
+    user_message: str,
+    memory_context: str,
+    chat_history: list[dict[str, Any]] | None = None,
+    user_id: str | None = None,
+) -> dict[str, Any]:
+    """Fallback loop using OpenRouter (OpenAI-compatible format)."""
+    settings = get_settings()
+    if not settings.openrouter_api_key:
+        logger.warning("OpenRouter fallback requested but no API key configured")
+        return {
+            "reply": add_disclosure(FALLBACK_RESPONSE),
+            "tool_calls_made": [],
+            "tool_results": [],
+            "fallback_used": True,
+        }
+
+    logger.info("Attempting OpenRouter fallback (openai/gpt-4o)")
+    
+    openai_tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": t["name"],
+                "description": t["description"],
+                "parameters": t["parameters"],
+            }
+        }
+        for t in TOOL_DECLARATIONS
+    ]
+
+    system_content = f"{SYSTEM_PROMPT}\n\nUser context:\n{memory_context}"
+    messages: list[dict[str, Any]] = [
+        {"role": "system", "content": system_content}
+    ]
+    if chat_history:
+        for msg in chat_history:
+            if msg.get("user_message"):
+                messages.append({"role": "user", "content": msg["user_message"]})
+            if msg.get("agent_reply"):
+                messages.append({"role": "assistant", "content": msg["agent_reply"]})
+                
+    messages.append({"role": "user", "content": user_message})
+
+    all_tool_results: list[dict[str, Any]] = []
+    tool_calls_made: list[str] = []
+
+    try:
+        for round_num in range(1, MAX_ROUNDS + 1):
+            logger.info("OpenRouter loop round %d/%d", round_num, MAX_ROUNDS)
+
+            payload = {
+                "model": "openai/gpt-4o",
+                "messages": messages,
+                "tools": openai_tools,
+                "tool_choice": "auto"
+            }
+            
+            headers = {
+                "Authorization": f"Bearer {settings.openrouter_api_key}",
+                "HTTP-Referer": "http://localhost:3000",
+                "X-Title": "FinResilience Pro"
+            }
+
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                resp = await client.post("https://openrouter.ai/api/v1/chat/completions", json=payload, headers=headers)
+                resp.raise_for_status()
+                data = resp.json()
+
+            choice = data["choices"][0]
+            message = choice["message"]
+            
+            messages.append(message)
+
+            if message.get("tool_calls"):
+                for tc in message["tool_calls"]:
+                    func = tc["function"]
+                    tool_name = func["name"]
+                    try:
+                        tool_args = json.loads(func["arguments"])
+                    except Exception:
+                        tool_args = {}
+
+                    if tool_name not in {t["name"] for t in TOOL_DECLARATIONS}:
+                        logger.error("OpenRouter requested unknown tool: %r", tool_name)
+                        tool_result = {"error": f"Unknown tool: {tool_name}"}
+                    else:
+                        tool_result = await execute_tool(tool_name, tool_args, user_id)
+                        tool_calls_made.append(tool_name)
+                        all_tool_results.append(tool_result)
+
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": tc["id"],
+                        "name": tool_name,
+                        "content": json.dumps(tool_result)
+                    })
+            else:
+                final_text = message.get("content", "")
+                if not final_text:
+                    final_text = FALLBACK_RESPONSE
+                validated = validate_response(final_text, all_tool_results)
+                return {
+                    "reply": add_disclosure(validated),
+                    "tool_calls_made": tool_calls_made,
+                    "tool_results": all_tool_results,
+                    "fallback_used": False,
+                }
+                
+        logger.warning("OpenRouter loop hit MAX_ROUNDS without completion")
+        return {
+            "reply": add_disclosure(FALLBACK_RESPONSE),
+            "tool_calls_made": tool_calls_made,
+            "tool_results": all_tool_results,
+            "fallback_used": True,
+        }
+
+    except Exception as exc:
+        logger.error("OpenRouter fallback failed: %s", type(exc).__name__)
         return {
             "reply": add_disclosure(FALLBACK_RESPONSE),
             "tool_calls_made": tool_calls_made,
