@@ -13,6 +13,23 @@ services:
     restart: unless-stopped
     command: ["serve", "--dir=/pb_data", "--publicDir=/pb_public", "--migrationsDir=/pb_migrations", "--http=0.0.0.0:8090"]
 
+  agent-server:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.agent
+    container_name: finresilience_agent
+    ports:
+      - "9000:9000"   # MCP Server (SSE transport) — 4 financial math tools
+      - "9001:9001"   # Agent API — ADK Runner endpoint
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - POCKETBASE_URL=http://pocketbase:8090
+      - MCP_SERVER_URL=http://localhost:9000/sse
+      - ENVIRONMENT=production
+    depends_on:
+      - pocketbase
+    restart: unless-stopped
+
   backend:
     build:
       context: ./backend
@@ -24,9 +41,11 @@ services:
       - POCKETBASE_URL=http://pocketbase:8090
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - AGENT_SERVER_URL=http://agent-server:9001
       - ENVIRONMENT=production
     depends_on:
       - pocketbase
+      - agent-server
     restart: unless-stopped
 
   frontend:

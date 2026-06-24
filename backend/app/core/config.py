@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     openrouter_api_key: str = ""
 
+    # Agent server (ADK + MCP) — proxied by /api/chat
+    agent_server_url: str = "http://localhost:9001"
+
     # PocketBase
     pocketbase_url: str = "http://localhost:8090"
 

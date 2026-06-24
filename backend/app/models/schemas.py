@@ -6,6 +6,8 @@ Mirrors the engine's data classes for API request/response validation.
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 

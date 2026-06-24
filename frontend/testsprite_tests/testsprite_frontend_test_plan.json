@@ -1,0 +1,607 @@
+[
+  {
+    "id": "TC001",
+    "title": "Submit income, expenses, debts, and tax investments for analysis",
+    "description": "This verifies that a user can enter complete financial details and generate the analysis dashboard.",
+    "category": "Financial Dashboard & Input Form",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the financial input form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid monthly income amount"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid monthly expense amount"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid debt amount"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid tax investment amount"
+      },
+      {
+        "type": "action",
+        "description": "Submit the analysis form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the results dashboard is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify next-rupee action cards are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Log in with valid credentials and reach the dashboard",
+    "description": "This verifies that an existing user can sign in successfully and reach the authenticated dashboard.",
+    "category": "User Authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click the log in action"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the authenticated dashboard is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Start from the landing page and open the dashboard",
+    "description": "This verifies that a new user can start from the landing page and reach the main dashboard view.",
+    "category": "Landing Page",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click the getting started action"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the main dashboard view is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "Create an account with valid details and reach the dashboard",
+    "description": "This verifies that a new user can sign up successfully and reach the authenticated dashboard.",
+    "category": "User Authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click the sign up action"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the authenticated dashboard is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Start from the landing page and open the login view",
+    "description": "This verifies that a new user can start from the landing page and reach the login view.",
+    "category": "Landing Page",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click the log in action"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the authentication view is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Show analysis results after submitting valid financial data",
+    "description": "This verifies that a completed analysis displays the payoff schedule and financial health indicators.",
+    "category": "Financial Dashboard & Input Form",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the financial input form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid monthly income amount"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid monthly expense amount"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid debt amount"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid tax investment amount"
+      },
+      {
+        "type": "action",
+        "description": "Submit the analysis form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the debt payoff schedule is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify financial health gauges are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Ask a finance question and continue the chat thread",
+    "description": "This verifies that a user can open the chat panel, ask a question, and receive a follow-up response in the same thread.",
+    "category": "Financial Dashboard & Input Form",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the financial input form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid monthly income amount"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid monthly expense amount"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid debt amount"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid tax investment amount"
+      },
+      {
+        "type": "action",
+        "description": "Submit the analysis form"
+      },
+      {
+        "type": "action",
+        "description": "Open the financial assistant chat panel"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a finance question"
+      },
+      {
+        "type": "action",
+        "description": "Send the chat message"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a follow-up finance question"
+      },
+      {
+        "type": "action",
+        "description": "Send the chat message"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the chat conversation shows assistant responses"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC008",
+    "title": "Ask a finance question and receive a response",
+    "description": "This verifies that a user can open the chat panel, send a finance question, and see the assistant reply in the conversation thread.",
+    "category": "Agentic Chat",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the chat panel"
+      },
+      {
+        "type": "action",
+        "description": "Type a finance question into the message field"
+      },
+      {
+        "type": "action",
+        "description": "Send the message"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the assistant response is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC009",
+    "title": "Continue a finance conversation with a follow-up question",
+    "description": "This verifies that a user can ask a follow-up question in the same chat thread and see the conversation update with another assistant response.",
+    "category": "Agentic Chat",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the chat panel"
+      },
+      {
+        "type": "action",
+        "description": "Type an initial finance question into the message field"
+      },
+      {
+        "type": "action",
+        "description": "Send the message"
+      },
+      {
+        "type": "action",
+        "description": "Type a follow-up finance question into the message field"
+      },
+      {
+        "type": "action",
+        "description": "Send the message"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the conversation thread shows the follow-up assistant response"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "Run a what-if simulation with a selected scenario and amount",
+    "description": "This verifies that a user can choose a scenario, enter an amount, run the simulation, and see projected financial results update.",
+    "category": "What-If Scenarios",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the what-if scenario panel"
+      },
+      {
+        "type": "action",
+        "description": "Select a scenario"
+      },
+      {
+        "type": "action",
+        "description": "Enter a valid amount into the amount field"
+      },
+      {
+        "type": "action",
+        "description": "Run the simulation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the projected comparison result is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC011",
+    "title": "Run a what-if scenario and compare projected outcomes",
+    "description": "This verifies that a user can open the what-if panel, choose a scenario, enter an amount, and view the comparison results.",
+    "category": "Financial Dashboard & Input Form",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the financial input form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid monthly income amount"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid monthly expense amount"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid debt amount"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid tax investment amount"
+      },
+      {
+        "type": "action",
+        "description": "Submit the analysis form"
+      },
+      {
+        "type": "action",
+        "description": "Open the what-if scenario panel"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid scenario"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a valid scenario amount"
+      },
+      {
+        "type": "action",
+        "description": "Run the simulation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the comparison results are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC012",
+    "title": "Update the what-if comparison by changing the amount",
+    "description": "This verifies that a user can adjust the scenario amount and see the comparison result refresh to reflect the new projection.",
+    "category": "What-If Scenarios",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the what-if scenario panel"
+      },
+      {
+        "type": "action",
+        "description": "Select a scenario"
+      },
+      {
+        "type": "action",
+        "description": "Enter a valid amount into the amount field"
+      },
+      {
+        "type": "action",
+        "description": "Run the simulation"
+      },
+      {
+        "type": "action",
+        "description": "Change the amount to a different valid value"
+      },
+      {
+        "type": "action",
+        "description": "Run the simulation again"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated comparison result is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC013",
+    "title": "Show validation feedback for an invalid login",
+    "description": "This verifies that entering invalid login details produces visible validation feedback instead of signing the user in.",
+    "category": "User Authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click the log in action"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with invalid-user@example.com"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with invalid-password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a validation error is visible"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC014",
+    "title": "Block simulation when the amount is missing",
+    "description": "This verifies that the what-if panel requires an amount before simulation and shows a validation state instead of producing results.",
+    "category": "What-If Scenarios",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the what-if scenario panel"
+      },
+      {
+        "type": "action",
+        "description": "Select a scenario"
+      },
+      {
+        "type": "action",
+        "description": "Run the simulation without entering an amount"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an amount validation error is shown"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC015",
+    "title": "Show validation feedback for an invalid financial amount",
+    "description": "This verifies that entering a negative or malformed financial amount is blocked with visible validation feedback.",
+    "category": "Financial Dashboard & Input Form",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the financial input form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a negative or malformed income amount"
+      },
+      {
+        "type": "action",
+        "description": "Submit the analysis form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a financial amount validation error is visible"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC016",
+    "title": "Prevent sending an empty chat message",
+    "description": "This verifies that a user cannot submit an empty chat message and that the UI keeps the conversation unchanged or shows a validation state.",
+    "category": "Agentic Chat",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the chat panel"
+      },
+      {
+        "type": "action",
+        "description": "Send the message without entering text"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an empty message validation state is shown"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC017",
+    "title": "Block simulation when the amount is invalid",
+    "description": "This verifies that the what-if panel rejects a malformed or invalid amount and does not show a projected result.",
+    "category": "What-If Scenarios",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the what-if scenario panel"
+      },
+      {
+        "type": "action",
+        "description": "Select a scenario"
+      },
+      {
+        "type": "action",
+        "description": "Enter an invalid amount into the amount field"
+      },
+      {
+        "type": "action",
+        "description": "Run the simulation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an amount validation error is shown"
+      }
+    ],
+    "priority": "Low"
+  }
+]

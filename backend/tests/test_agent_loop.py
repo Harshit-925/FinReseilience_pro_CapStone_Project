@@ -83,7 +83,7 @@ async def test_agent_loop_what_if_routing():
 @pytest.mark.asyncio
 async def test_agent_loop_health_routing():
     mock_gemini_response_1 = {
-        "candidates": [{"content": {"parts": [{"functionCall": {"name": "run_health_score", "args": {"income": 100000, "expenses": 50000, "total_debt": 0, "total_emi": 0}}}}]}}]
+        "candidates": [{"content": {"parts": [{"functionCall": {"name": "run_health_score", "args": {"income": 100000, "expenses": 50000, "total_debt": 0, "total_emi": 0}}}]}}]
     }
     mock_gemini_response_2 = {
         "candidates": [{"content": {"parts": [{"text": "Your score is 99.0."}]}}]

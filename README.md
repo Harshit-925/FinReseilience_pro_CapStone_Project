@@ -9,19 +9,20 @@
 
 **FinResilience Pro** is a privacy-first, deterministic financial orchestrator. It ignores "AI narrative" fluff in favor of hard math, optimizing the exact destination of your next surplus rupee to maximize long-term net worth. 
 
+*A private financial concierge that reasons across debt, tax, and health-score tradeoffs for one household — and never lets your financial data leave your control.*
+
 This platform evaluates debt using the **Avalanche Method**, optimizes domestic tax shields (80C, 80D, 80CCD(1B), HRA) using **FY 2026-27 Indian tax laws**, and calculates financial health via **RBI/SBI FOIR benchmarks**.
 
 ---
 
-## 🚀 Key Features
+## 🚀 Key Features & Privacy-First Architecture
 
+- **True Privacy-First Execution**: Your financial structures are processed in-memory and are **never** used to train external LLMs. Your data stays entirely in your control.
+- **Google ADK Concierge Agent**: We use the official Google Agent Development Kit (ADK) to run an intelligent orchestrator that decides *when* and *how* to use mathematical tools.
+- **MCP Tool Integration**: Built using the Model Context Protocol (FastMCP via SSE), providing a decoupled, secure execution layer for the mathematical tools.
 - **Deterministic Math Engine**: Raw Python algorithms for debt scheduling, avalanche methodology, and tax shielding. Zero LLM hallucinations in the core math.
-- **Privacy-First Architecture**: User financial structures are processed in-memory and are never used to train external LLMs.
-- **AI Institutional Intelligence**: Uses Google Gemini 2.5 Flash as an *isolated narrative layer* to convert the engine's hard numbers into personalized, plain-language financial advice.
-- **Real-Time Market Intelligence**: Aggregates live business news from BBC Business, Financial Times, and WSJ using a dynamic, paginated feed with auto-refresh and intelligent deduplication.
-- **Premium Subscription & Payment Flows**: Interactive pricing tiers (Free, ₹500, ₹1000) with a premium simulated checkout experience supporting UPI, Cards, and Net Banking.
 - **Accessible & Ambient UI**: Clean, responsive layout with ambient animations, structured cards, WCAG 2.1 AA compliant, and real-time form processing.
-- **Offline Resilience**: Built-in fallback circuits ensure you get your math even if the AI narrative generator goes offline or the API key is missing.
+- **Offline Resilience**: Built-in fallback circuits ensure you get your math even if the AI narrative generator goes offline.
 
 ---
 
@@ -49,38 +50,42 @@ This platform evaluates debt using the **Avalanche Method**, optimizes domestic 
 
 ---
 
-## 🏗 Architecture & Flow Diagram
-
-The application is structured into three main layers: a React frontend, a FastAPI python engine, and a PocketBase database/auth layer. 
+The application is structured into a secure, privacy-first topology consisting of a React frontend, a FastAPI proxy, a dedicated Agent Server powered by Google ADK, and an isolated MCP tool execution server.
 
 ```mermaid
 graph TD
     %% Define Styles
     classDef frontend fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff;
-    classDef backend fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff;
-    classDef db fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff;
-    classDef ai fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:#fff;
+    classDef proxy fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff;
+    classDef agent fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:#fff;
+    classDef mcp fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff;
+    classDef db fill:#475569,stroke:#334155,stroke-width:2px,color:#fff;
 
     %% Nodes
     User([User / Browser])
-    UI["React 18 Frontend<br/>(Vite, Zustand, Tailwind)"]:::frontend
-    API["FastAPI Backend<br/>(Financial Engine)"]:::backend
-    DB[("PocketBase<br/>SQLite + Auth")]:::db
-    Gemini["Google Gemini 2.5<br/>AI Narrative API"]:::ai
+    UI["React Frontend<br/>(Vite)"]:::frontend
+    API["Backend Proxy<br/>(FastAPI)"]:::proxy
+    DB[("PocketBase<br/>(Auth/DB)")]:::db
+    
+    subgraph Privacy Boundary
+        Agent["Google ADK Agent<br/>(Concierge Runner)"]:::agent
+        MCP["MCP Math Server<br/>(FastMCP SSE)"]:::mcp
+        Engine["Deterministic Engine<br/>(Avalanche/Tax/FOIR)"]:::mcp
+    end
 
     %% Flow
-    User -->|Inputs Financial Data| UI
-    UI -->|JSON Payload REST| API
+    User -->|Chat / Inputs| UI
+    UI -->|REST Payload| API
+    API -->|Proxies turn| Agent
     
-    API -->|Validates Inputs| Engine["Deterministic Engine<br/>- Avalanche<br/>- Tax Shield<br/>- Health Score"]:::backend
+    Agent -->|Calls Math Tools| MCP
+    MCP -->|Calculates| Engine
+    Engine -.->|Returns precise figures| MCP
+    MCP -.->|Tool Response| Agent
     
-    Engine -->|Output Summary| AI_Service["AI Service<br/>httpx Async"]:::backend
-    AI_Service -->|Prompts with Context| Gemini
-    Gemini -.->|Personalized Advice| AI_Service
-    
-    API -->|Aggregates Result| UI
-    UI -->|Saves Profile| DB
-    UI -->|Reads Auth/State| DB
+    Agent -->|Formulates Advice| API
+    API -->|Validated Reply| UI
+    UI -->|Persists History| DB
 ```
 
 ---
@@ -91,10 +96,10 @@ graph TD
 |-----------|------------|-------------|
 | **Frontend** | React 18, TypeScript, Vite | Fast, modern UI powered by Zustand for state management and Framer Motion for micro-interactions. |
 | **Styling** | Vanilla CSS, Tailwind, Lucide | Ambient gradients, dark/light theme support, and premium glassmorphism/elevated cards. |
-| **Backend** | FastAPI, Python 3.11+, Pydantic | High-performance, async backend for deterministic financial calculations. |
+| **Backend / Proxy** | FastAPI, Python 3.11+ | High-performance, async backend for routing and security guardrails. |
+| **Concierge Agent** | **Google ADK** | State-of-the-art agent execution using the official Google ADK framework. |
+| **Tool Execution** | **MCP Protocol** | Isolated math tool execution via FastMCP (SSE transport). |
 | **Database** | PocketBase (SQLite) | Embedded, high-performance local database for user auth and data retention. |
-| **AI Integration** | Google Gemini API (httpx) | Asynchronous context-aware AI narrative generation. |
-| **News Integration**| rss2json API | Real-time, keyless RSS parsing for multi-source financial news aggregation. |
 
 ---
 

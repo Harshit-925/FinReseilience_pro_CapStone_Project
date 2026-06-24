@@ -1,0 +1,80 @@
+version: "2"
+type: frontend
+tech_stack:
+  - TypeScript
+  - React 18
+  - Vite
+  - Tailwind CSS
+  - Zustand
+  - Sonner
+routes:
+  - path: /
+    file: src/App.tsx
+    auth_required: false
+    description: Main application page with conditional rendering for views
+features:
+  - name: Landing Page
+    description: View the landing page to get started or login
+    files:
+      - src/components/LandingHero.tsx
+      - src/App.tsx
+    entry_route: /
+    user_interactions:
+      - Click "Get Started" to go to dashboard
+      - Click "Log In" to go to login view
+    auth_required: false
+  - name: User Authentication
+    description: Login and signup via PocketBase
+    files:
+      - src/components/LoginForm.tsx
+      - src/components/SignupForm.tsx
+      - src/store/useAuthStore.ts
+    entry_route: /
+    user_interactions:
+      - Fill email and password
+      - Click Submit
+    api_calls:
+      - method: POST
+        endpoint: /api/collections/users/auth-with-password
+    auth_required: false
+  - name: Financial Dashboard & Input Form
+    description: Input financial data to generate an analysis
+    files:
+      - src/components/InputForm.tsx
+      - src/components/ResultsPanel.tsx
+    entry_route: /
+    user_interactions:
+      - Fill in income, expenses, debts
+      - Click Analyze
+    api_calls:
+      - method: POST
+        endpoint: /api/analyze
+    auth_required: false
+  - name: Agentic Chat
+    description: Chat with the deterministic AI agent
+    files:
+      - src/components/ChatPanel.tsx
+      - src/api/chat.ts
+    entry_route: /
+    user_interactions:
+      - Type message
+      - Click Send
+    api_calls:
+      - method: POST
+        endpoint: /api/chat
+    auth_required: false
+  - name: What-If Scenarios
+    description: Simulate financial changes
+    files:
+      - src/components/WhatIfPanel.tsx
+      - src/api/chat.ts
+    entry_route: /
+    user_interactions:
+      - Select scenario
+      - Enter amount
+      - Click Simulate
+    api_calls:
+      - method: POST
+        endpoint: /api/whatif
+    auth_required: false
+known_limitations: []

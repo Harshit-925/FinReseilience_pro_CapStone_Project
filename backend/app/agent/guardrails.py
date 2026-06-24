@@ -28,8 +28,8 @@ logger = logging.getLogger(__name__)
 
 # Regex patterns for number extraction
 _RUPEE_PATTERN = re.compile(r"₹\s*([\d,]+(?:\.\d+)?)")
-_PLAIN_NUMBER_PATTERN = re.compile(r"\b(\d{2,}(?:,\d+)*(?:\.\d+)?)\b")
-_SENTENCE_PATTERN = re.compile(r"[^.!?]+[.!?]")
+_PLAIN_NUMBER_PATTERN = re.compile(r"(?<![\d.,])(\d{2,}(?:,\d+)*(?:\.\d+)?)(?![.,]?\d)")
+_SENTENCE_PATTERN = re.compile(r"(?<=[.!?])\s+")
 
 
 def _parse_rupee(s: str) -> float:
@@ -140,7 +140,7 @@ def validate_response(
     )
 
     # Strip sentences that contain hallucinated values, preserve sentences with valid values
-    sentences = _SENTENCE_PATTERN.findall(agent_response)
+    sentences = [s.strip() for s in _SENTENCE_PATTERN.split(agent_response) if s.strip()]
     kept_sentences: list[str] = []
 
     for sentence in sentences:

@@ -186,19 +186,27 @@ async def chat(
     payload: ChatRequest,
     user: dict[str, Any] | None = Depends(get_optional_user),
 ) -> ChatResponse:
-    """Agentic chat loop with function calling and session memory."""
+    """
+    Agentic chat — proxies to the ADK agent server (google-adk + MCP) as the primary path.
+
+    Fallback chain:
+      1. ADK agent server at {AGENT_SERVER_URL}/agent/chat  ← primary (Google ADK + MCP)
+      2. loop.py run_agent_turn() ← fallback if agent-server is unreachable
+         (same custom Gemini function-calling loop as before)
+
+    /api/analyze is completely separate and untouched by this route.
+    """
     try:
         user_id = user.get("id", "anonymous") if user else "anonymous"
         user_token = user.get("token", "") if user else ""
-        
+
         memory = MemoryManager(user_id, user_token) if user else None
         last_session = await memory.get_last_session() if memory else None
-        
-        # Build context
+
+        # Build memory context
         needs_replan = False
         snapshot_context = ""
         if payload.profile_snapshot:
-            # Inject profile_snapshot numbers into context
             snapshot_context = (
                 f"\n\nCURRENT FINANCIAL SNAPSHOT:\n"
                 f"- Income: ₹{payload.profile_snapshot.monthly_income}\n"
@@ -210,23 +218,75 @@ async def chat(
                     current_profile=payload.profile_snapshot.model_dump(),
                     last_session=last_session,
                 )
-            
-        base_memory_context = memory.build_context_string(last_session, needs_replan) if memory else "No previous session found."
-        memory_context = base_memory_context + snapshot_context
-        
-        chat_history = await memory.get_chat_history(payload.session_id, limit=20) if memory else []
-        
-        # Run agent loop
-        result = await run_agent_turn(
-            user_message=payload.message,
-            memory_context=memory_context,
-            chat_history=chat_history,
-            profile_snapshot=payload.profile_snapshot.model_dump() if payload.profile_snapshot else None,
-            user_id=user_id,
-            user_token=user_token,
+
+        base_memory_context = (
+            memory.build_context_string(last_session, needs_replan) if memory
+            else "No previous session found."
         )
-        
-        # Save chat turn if authenticated
+        memory_context = base_memory_context + snapshot_context
+
+        chat_history = await memory.get_chat_history(payload.session_id, limit=20) if memory else []
+
+        # ------------------------------------------------------------------
+        # Primary path: ADK agent server
+        # Tries to POST to {agent_server_url}/agent/chat.
+        # If the agent-server container is unreachable (ConnectError, timeout),
+        # we catch it here and fall through to the loop.py fallback.
+        # ------------------------------------------------------------------
+        settings = get_settings()
+        result: dict[str, Any] | None = None
+
+        try:
+            agent_payload = {
+                "message": payload.message,
+                "session_id": payload.session_id,
+                "user_id": user_id,
+                "memory_context": memory_context,
+                "profile_snapshot": (
+                    payload.profile_snapshot.model_dump()
+                    if payload.profile_snapshot else None
+                ),
+            }
+            async with httpx.AsyncClient(timeout=45.0) as client:
+                resp = await client.post(
+                    f"{settings.agent_server_url}/agent/chat",
+                    json=agent_payload,
+                )
+                resp.raise_for_status()
+                result = resp.json()
+                logger.info(
+                    "ADK agent responded (user=%s, tools=%s)",
+                    user_id,
+                    result.get("tool_calls_made", []),
+                )
+
+        except (httpx.ConnectError, httpx.TimeoutException, httpx.RequestError) as proxy_exc:
+            # Agent-server is unreachable — fall back to loop.py
+            # This is a network/availability failure, NOT a Gemini failure.
+            logger.warning(
+                "Agent server unreachable (%s) — falling back to loop.py",
+                type(proxy_exc).__name__,
+            )
+            result = None
+
+        # ------------------------------------------------------------------
+        # Fallback path: existing custom loop.py agent
+        # Same Gemini function-calling loop that was used before ADK was added.
+        # ------------------------------------------------------------------
+        if result is None:
+            result = await run_agent_turn(
+                user_message=payload.message,
+                memory_context=memory_context,
+                chat_history=chat_history,
+                profile_snapshot=(
+                    payload.profile_snapshot.model_dump()
+                    if payload.profile_snapshot else None
+                ),
+                user_id=user_id,
+                user_token=user_token,
+            )
+
+        # Save chat turn to PocketBase regardless of which path was used
         if memory:
             await memory.save_chat_turn(
                 session_id=payload.session_id,
@@ -234,14 +294,14 @@ async def chat(
                 agent_reply=result["reply"],
                 tool_calls_made=result["tool_calls_made"],
             )
-            
+
         return ChatResponse(
             reply=result["reply"],
             tool_calls_made=result["tool_calls_made"],
             tool_results=result["tool_results"],
             fallback_used=result["fallback_used"],
         )
-        
+
     except Exception as exc:
         logger.error("Chat failed: %s", type(exc).__name__)
         raise HTTPException(status_code=500, detail="Chat failed")

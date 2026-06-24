@@ -1,0 +1,26 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install agent_server dependencies
+COPY agent_server/requirements.txt ./agent_server_requirements.txt
+RUN pip install --no-cache-dir -r agent_server_requirements.txt
+
+# Copy shared app code that the agent_server imports:
+#   - app/engine/calculator.py  (math tools)
+#   - app/agent/guardrails.py   (numeric validation)
+#   - app/agent/memory.py       (session context)
+#   - app/core/config.py        (settings)
+COPY app/ ./app/
+
+# Copy agent_server source
+COPY agent_server/ ./agent_server/
+
+# Run as non-root user
+RUN useradd -m appuser && chown -R appuser /app
+USER appuser
+
+# MCP Server (SSE) + Agent API
+EXPOSE 9000 9001
+
+CMD ["python", "-m", "agent_server.start"]

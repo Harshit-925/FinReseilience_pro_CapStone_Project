@@ -59,3 +59,12 @@ def test_guardrails_score_tolerance():
     response_bad = "Your score is 74.0."
     validated_bad = validate_response(response_bad, tool_results)
     assert "74.0" not in validated_bad
+
+def test_guardrails_decimal_split():
+    # Regression test for decimal splitting issue
+    # The sentence splitting regex should not break on '38.0%'
+    tool_results = [{"foir": 38.0}]
+    response = "Your FOIR is 38.0%. This is the end of the sentence."
+    # If it splits on '38.', it would process '0%. This is the end of the sentence.' separately.
+    validated = validate_response(response, tool_results)
+    assert "38.0%" in validated
