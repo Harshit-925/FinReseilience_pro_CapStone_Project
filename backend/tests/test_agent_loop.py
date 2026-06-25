@@ -7,6 +7,7 @@ async def test_agent_loop_no_api_key():
     # If API key is not set, it should return fallback immediately
     with patch("app.agent.loop.get_settings") as mock_settings:
         mock_settings.return_value.gemini_api_key = None
+        mock_settings.return_value.openrouter_api_key = None
         result = await run_agent_turn("Hello", "Context")
         assert result["fallback_used"] is True
         assert "exact figures" in result["reply"]
@@ -72,6 +73,7 @@ async def test_agent_loop_what_if_routing():
     with patch("httpx.AsyncClient.post", side_effect=mock_post):
         with patch("app.agent.loop.get_settings") as mock_settings:
             mock_settings.return_value.gemini_api_key = "fake_key"
+            mock_settings.return_value.openrouter_api_key = None
             result = await run_agent_turn("What if I get a raise to 150000?", "Context")
             
             assert "run_what_if" in result["tool_calls_made"]
@@ -105,6 +107,7 @@ async def test_agent_loop_health_routing():
     with patch("httpx.AsyncClient.post", side_effect=mock_post), \
          patch("app.agent.loop.get_settings") as mock_settings:
         mock_settings.return_value.gemini_api_key = "fake_key"
+        mock_settings.return_value.openrouter_api_key = None
         result = await run_agent_turn("What is my health score?", "Context")
         
         assert "run_health_score" in result["tool_calls_made"]

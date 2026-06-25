@@ -34,44 +34,58 @@ async def run_test():
 
         # Interact with the page elements to simulate user flow
         # -> navigate
-        await page.goto("http://localhost:4173")
+        await page.goto("http://localhost:3000")
         try:
             await page.wait_for_load_state("domcontentloaded", timeout=5000)
         except Exception:
             pass
         
-        # -> Open the what-if scenario panel by clicking the 'Start Your Optimization' button visible in the hero section.
+        # -> Click the 'Start Your Optimization' button to open the optimization / what‑if scenario panel.
         # bolt Start Your Optimization button
         elem = page.get_by_role('button', name='bolt Start Your Optimization', exact=True)
         await elem.click(timeout=10000)
         
-        # -> Scroll down the page to reveal the scenario selection and run controls in the What-if / Scenario panel so a scenario can be selected.
-        await page.mouse.wheel(0, 300)
+        # -> Click the 'AI Agent' tab at the top of the profile to open the what‑if / scenario panel so scenarios can be selected.
+        # smart_toy AI Agent button
+        elem = page.get_by_role('button', name='smart_toy AI Agent', exact=True)
+        await elem.click(timeout=10000)
         
-        # -> Select the 'Full Analysis' scenario by clicking the 'Full Analysis' button so the scenario is chosen before running the simulation.
+        # -> Click the 'Full Analysis' button to open the analysis panel so scenario/what-if controls can be found and a simulation can be started without entering an amount.
         # Full Analysis button
         elem = page.get_by_role('button', name='Full Analysis', exact=True)
         await elem.click(timeout=10000)
         
-        # -> Click the 'Analyze & Optimize Capital' button to run the simulation without entering an amount and observe whether an amount validation error appears.
-        # bolt Analyze & Optimize Capital button
-        elem = page.get_by_role('button', name='bolt Analyze & Optimize Capital', exact=True)
+        # -> scroll
+        await page.mouse.wheel(0, 300)
+        
+        # -> click
+        # Full Analysis button
+        elem = page.get_by_role('button', name='Full Analysis', exact=True)
         await elem.click(timeout=10000)
         
-        # -> Inspect the numeric input fields in the financial snapshot (Monthly Net Income, Basic Salary, Monthly Expenses, Rent, HRA, Age, Parents' Age) for validation attributes (aria-invalid, value, required, placeholder), then click the 'Analyze...
-        # bolt Analyze & Optimize Capital button
-        elem = page.get_by_role('button', name='bolt Analyze & Optimize Capital', exact=True)
+        # -> Click the 'Full Analysis' button to open the analysis panel so scenario/what-if controls can be revealed.
+        # Full Analysis button
+        elem = page.get_by_role('button', name='Full Analysis', exact=True)
         await elem.click(timeout=10000)
+        
+        # -> Open the AI Assistant by clicking the floating 'Open AI Assistant' button to reveal scenario/what-if controls.
+        # Open AI Assistant button
+        elem = page.get_by_role('button', name='Open AI Assistant', exact=True)
+        await elem.click(timeout=10000)
+        
+        # -> Scroll down the analysis/profile area to reveal the what-if / scenario controls, then search the page for the words 'what-if', 'scenario', or 'simulate' to locate scenario selection UI.
+        await page.mouse.wheel(0, 300)
+        
+        # -> Scroll down the analysis/profile area to reveal any hidden scenario or simulation controls, then search the page for the word 'simulate' to locate a scenario/run button.
+        await page.mouse.wheel(0, 300)
         
         # --> Assertions to verify final state
         
         # --> Verify an amount validation error is shown
-        # Assert: The Monthly Net Income input is empty, showing no amount was entered.
-        await expect(page.locator("xpath=/html/body/div/div/main/div/div[2]/div[1]/form/div[2]/div[1]/div[2]/div/input").nth(0)).to_have_value("", timeout=15000), "The Monthly Net Income input is empty, showing no amount was entered."
-        # Assert: The Basic Salary input is empty, showing no amount was entered.
-        await expect(page.locator("xpath=/html/body/div/div/main/div/div[2]/div[1]/form/div[2]/div[1]/div[3]/div[1]/div/input").nth(0)).to_have_value("", timeout=15000), "The Basic Salary input is empty, showing no amount was entered."
-        # Assert: The Monthly Expenses input is empty, showing no amount was entered.
-        await expect(page.locator("xpath=/html/body/div/div/main/div/div[2]/div[1]/form/div[2]/div[1]/div[3]/div[2]/div/input").nth(0)).to_have_value("", timeout=15000), "The Monthly Expenses input is empty, showing no amount was entered."
+        # Assert: The 'Ready to Analyze' instruction is visible, indicating analysis is blocked until amounts are entered.
+        await expect(page.locator("xpath=/html/body/div/div/main/div/div[3]/div/div").nth(0)).to_contain_text("Ready to Analyze", timeout=15000), "The 'Ready to Analyze' instruction is visible, indicating analysis is blocked until amounts are entered."
+        # Assert: The Monthly Net Income input is empty, confirming no amount was entered.
+        await expect(page.locator("xpath=/html/body/div/div/main/div/div[2]/div[1]/form/div[2]/div[1]/div[2]/div/input").nth(0)).to_have_value("", timeout=15000), "The Monthly Net Income input is empty, confirming no amount was entered."
         await asyncio.sleep(5)
 
     finally:

@@ -269,6 +269,12 @@ async def chat(
             )
             result = None
 
+        # If the agent-server returned a fallback (i.e. it didn't actually
+        # produce an AI answer), discard it and let loop.py handle the request.
+        if result and result.get("fallback_used"):
+            logger.warning("Agent server returned fallback — falling back to loop.py")
+            result = None
+
         # ------------------------------------------------------------------
         # Fallback path: existing custom loop.py agent
         # Same Gemini function-calling loop that was used before ADK was added.

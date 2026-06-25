@@ -2,7 +2,7 @@
   "status": "commited",
   "type": "frontend",
   "scope": "codebase",
-  "localEndpoint": "http://localhost:4173",
+  "localEndpoint": "http://localhost:3000",
   "executionArgs": {
     "projectName": "frontend",
     "projectPath": "c:\\Users\\hk672\\OneDrive\\Desktop\\Program\\FinResilience Pro Automated Wealth and  Debt Optimization Platform\\frontend",
@@ -13,5 +13,5 @@
       "API_KEY": "sk-user-yUyvNnNNRSWYty_WrVlAGswwNtIadl7u09iPZ3RoeCF610a-p29U4efNJlHjLtff6tAZfWE-bIQkRVdl0Y0mxzuKQzLGrhYA3_-d8YrpuY85lSdK8Bp8rawaL-6g_2Tcok8"
     }
   },
-  "serverPort": 51281
+  "serverPort": 59452
 }

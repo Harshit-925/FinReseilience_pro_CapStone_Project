@@ -43,7 +43,7 @@ export default function WhatIfPanel({ baseProfile }: WhatIfPanelProps) {
 
       <div style={{ display: "flex", gap: 16, alignItems: "flex-end", flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 200 }}>
-          <label style={{ display: "block", marginBottom: 8, fontSize: 13, fontWeight: 600 }}>What if...</label>
+          <label style={{ display: "block", marginBottom: 8, fontSize: 13, fontWeight: 600 }}>Scenario</label>
           <select 
             value={changeType} 
             onChange={(e) => setChangeType(e.target.value)}

@@ -34,13 +34,13 @@ async def run_test():
 
         # Interact with the page elements to simulate user flow
         # -> navigate
-        await page.goto("http://localhost:4173")
+        await page.goto("http://localhost:3000")
         try:
             await page.wait_for_load_state("domcontentloaded", timeout=5000)
         except Exception:
             pass
         
-        # -> Click the 'Sign In' button in the page header to open the authentication/login view.
+        # -> click
         # Sign In button
         elem = page.get_by_role('button', name='Sign In', exact=True)
         await elem.click(timeout=10000)
@@ -48,15 +48,18 @@ async def run_test():
         # --> Assertions to verify final state
         
         # --> Verify the authentication view is displayed
-        await page.locator("xpath=/html/body/div[1]/div/main/div/div/div/form/div[1]/input").nth(0).scroll_into_view_if_needed()
-        # Assert: The Email input is visible on the authentication view.
-        await expect(page.locator("xpath=/html/body/div[1]/div/main/div/div/div/form/div[1]/input").nth(0)).to_be_visible(timeout=15000), "The Email input is visible on the authentication view."
-        await page.locator("xpath=/html/body/div[1]/div/main/div/div/div/form/div[2]/input").nth(0).scroll_into_view_if_needed()
-        # Assert: The Password input is visible on the authentication view.
-        await expect(page.locator("xpath=/html/body/div[1]/div/main/div/div/div/form/div[2]/input").nth(0)).to_be_visible(timeout=15000), "The Password input is visible on the authentication view."
-        await page.locator("xpath=/html/body/div[1]/div/main/div/div/div/form/button").nth(0).scroll_into_view_if_needed()
-        # Assert: The 'Sign In' button is visible on the authentication view.
-        await expect(page.locator("xpath=/html/body/div[1]/div/main/div/div/div/form/button").nth(0)).to_be_visible(timeout=15000), "The 'Sign In' button is visible on the authentication view."
+        await page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div/div[2]/button").nth(0).scroll_into_view_if_needed()
+        # Assert: The 'Continue with Google' button is visible, confirming the authentication view.
+        await expect(page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div/div[2]/button").nth(0)).to_be_visible(timeout=15000), "The 'Continue with Google' button is visible, confirming the authentication view."
+        await page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div/form/div[1]/div/input").nth(0).scroll_into_view_if_needed()
+        # Assert: The email input with placeholder 'Enter your email address' is visible.
+        await expect(page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div/form/div[1]/div/input").nth(0)).to_be_visible(timeout=15000), "The email input with placeholder 'Enter your email address' is visible."
+        await page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div/form/div[2]/div/input").nth(0).scroll_into_view_if_needed()
+        # Assert: The password input with placeholder 'Enter your password' is visible.
+        await expect(page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div/form/div[2]/div/input").nth(0)).to_be_visible(timeout=15000), "The password input with placeholder 'Enter your password' is visible."
+        await page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div/form/div[3]/button").nth(0).scroll_into_view_if_needed()
+        # Assert: The 'Sign in →' submit button is visible.
+        await expect(page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div/form/div[3]/button").nth(0)).to_be_visible(timeout=15000), "The 'Sign in \u2192' submit button is visible."
         await asyncio.sleep(5)
 
     finally:

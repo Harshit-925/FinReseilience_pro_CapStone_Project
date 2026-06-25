@@ -34,62 +34,44 @@ async def run_test():
 
         # Interact with the page elements to simulate user flow
         # -> navigate
-        await page.goto("http://localhost:4173")
+        await page.goto("http://localhost:3000")
         try:
             await page.wait_for_load_state("domcontentloaded", timeout=5000)
         except Exception:
             pass
         
-        # -> Scroll down the homepage to reveal the chat widget or an interface control labeled 'Chat', 'Message', or similar so the chat panel can be opened.
-        await page.mouse.wheel(0, 300)
-        
-        # -> Search the page text for the word 'chat' to locate any chat widget, 'Message' field, or support/chat control before scrolling further.
-        await page.mouse.wheel(0, 300)
-        
-        # -> Click the 'View Demo' button to open the demo interface which may contain the chat panel or message input.
-        # View Demo button
-        elem = page.get_by_role('button', name='View Demo', exact=True)
+        # -> Open the chat panel by clicking the 'Open AI Assistant' button in the bottom-right of the page so the message input field appears.
+        # Open AI Assistant button
+        elem = page.get_by_role('button', name='Open AI Assistant', exact=True)
         await elem.click(timeout=10000)
         
-        # -> Click the 'View Demo' button on the homepage to open the demo interface and reveal any chat controls or message input.
-        # View Demo button
-        elem = page.get_by_role('button', name='View Demo', exact=True)
+        # -> Type an initial finance question into the message field and click the 'Send message' button so the assistant receives the first message.
+        # Ask a question about your finances... text area
+        elem = page.get_by_placeholder('Ask a question about your finances...', exact=True)
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("How can I reduce my monthly expenses and accelerate debt payoff?")
+        
+        # -> Type an initial finance question into the message field and click the 'Send message' button so the assistant receives the first message.
+        # Send message button
+        elem = page.get_by_role('button', name='Send message', exact=True)
         await elem.click(timeout=10000)
         
-        # -> Click the 'View Demo' button to open the demo interface and reveal any chat controls or message input field.
-        # View Demo button
-        elem = page.get_by_role('button', name='View Demo', exact=True)
-        await elem.click(timeout=10000)
+        # -> Type an initial finance question into the message field and click the 'Send message' button so the assistant receives the first message.
+        # Ask a question about your finances... text area
+        elem = page.get_by_placeholder('Ask a question about your finances...', exact=True)
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("If I can free an extra \u20b95,000 per month, should I apply it to the highest-interest loan or split it across loans?")
         
-        # -> Click the 'View Demo' button on the homepage to open the demo interface and reveal any chat controls or message input.
-        # View Demo button
-        elem = page.get_by_role('button', name='View Demo', exact=True)
-        await elem.click(timeout=10000)
-        
-        # -> Open the demo by clicking the 'View Demo' button so the chat panel or message input can be located and revealed.
-        # View Demo button
-        elem = page.get_by_role('button', name='View Demo', exact=True)
-        await elem.click(timeout=10000)
-        
-        # -> Click the 'View Demo' button to open the demo interface and reveal the chat panel or message input so the conversation can be started.
-        # View Demo button
-        elem = page.get_by_role('button', name='View Demo', exact=True)
-        await elem.click(timeout=10000)
-        
-        # -> Click the 'View Demo' button on the homepage to open the demo interface and reveal the chat panel or message input so the conversation can be started.
-        # View Demo button
-        elem = page.get_by_role('button', name='View Demo', exact=True)
-        await elem.click(timeout=10000)
-        
-        # -> Click the 'Start Your Optimization' button to open the interactive/demo flow which may contain the chat panel or message input.
-        # bolt Start Your Optimization button
-        elem = page.get_by_role('button', name='bolt Start Your Optimization', exact=True)
+        # -> Type an initial finance question into the message field and click the 'Send message' button so the assistant receives the first message.
+        # Send message button
+        elem = page.get_by_role('button', name='Send message', exact=True)
         await elem.click(timeout=10000)
         
         # --> Assertions to verify final state
-        current_url = await page.evaluate("() => window.location.href")
-        # Assert: page loaded with a URL (final outcome verified by the AI judge during the run)
-        assert current_url, 'Page should have loaded with a URL'
+        
+        # --> Verify the conversation thread shows the follow-up assistant response
+        # Assert: The conversation shows the assistant reply 'I ran your analysis using the financial engine. Please refer to the Analysis tab for the complete results with exact figures.' after the follow-up question.
+        await expect(page.locator("xpath=/html/body/div[1]").nth(0)).to_contain_text("I ran your analysis using the financial engine. Please refer to the Analysis tab for the complete results with exact figures.", timeout=15000), "The conversation shows the assistant reply 'I ran your analysis using the financial engine. Please refer to the Analysis tab for the complete results with exact figures.' after the follow-up question."
         await asyncio.sleep(5)
 
     finally:

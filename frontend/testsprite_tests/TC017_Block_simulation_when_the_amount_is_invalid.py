@@ -34,32 +34,50 @@ async def run_test():
 
         # Interact with the page elements to simulate user flow
         # -> navigate
-        await page.goto("http://localhost:4173")
+        await page.goto("http://localhost:3000")
         try:
             await page.wait_for_load_state("domcontentloaded", timeout=5000)
         except Exception:
             pass
         
-        # -> Click the 'Start Your Optimization' button to open the what-if scenario panel.
+        # -> Click the 'Start Your Optimization' button to open the optimization flow where the what-if scenario panel should be accessible.
         # bolt Start Your Optimization button
         elem = page.get_by_role('button', name='bolt Start Your Optimization', exact=True)
         await elem.click(timeout=10000)
         
-        # -> Click the 'Analyze & Optimize Capital' button to open the what-if / what-if scenario panel (the primary bolt action labeled 'Analyze & Optimize Capital').
-        # bolt Analyze & Optimize Capital button
-        elem = page.get_by_role('button', name='bolt Analyze & Optimize Capital', exact=True)
+        # -> Open the what-if scenario panel by clicking the 'AI Agent' tab to reveal scenario selection and amount input controls.
+        # smart_toy AI Agent button
+        elem = page.get_by_role('button', name='smart_toy AI Agent', exact=True)
         await elem.click(timeout=10000)
         
-        # -> Click the 'Analyze & Optimize Capital' button to open the what-if / scenario panel (attempt #3).
-        # bolt Analyze & Optimize Capital button
-        elem = page.get_by_role('button', name='bolt Analyze & Optimize Capital', exact=True)
+        # -> Click the 'Full Analysis' button in the top navigation to open the analysis panel and look for the what-if scenario selection and the amount input field.
+        # Full Analysis button
+        elem = page.get_by_role('button', name='Full Analysis', exact=True)
+        await elem.click(timeout=10000)
+        
+        # -> Click the 'Open AI Assistant' floating chat button to attempt to open the what-if scenario panel (the control labeled 'Open AI Assistant').
+        # Open AI Assistant button
+        elem = page.get_by_role('button', name='Open AI Assistant', exact=True)
+        await elem.click(timeout=10000)
+        
+        # -> In the Agentic Chat, send a message asking the assistant to open the what-if scenario panel and display scenario selection and an amount input so an invalid amount can be entered.
+        # Ask a question about your finances... text area
+        elem = page.get_by_placeholder('Ask a question about your finances...', exact=True)
+        await elem.wait_for(state="visible", timeout=10000)
+        await elem.fill("Please open the what-if scenario panel in the UI and show the scenario selector and an Amount input field so I can run a simulation. If the panel is available, present a selectable scenario (for example 'Investment Increase' or similar) and an amount field that accepts input. I will then enter an invalid amount to test validation.")
+        
+        # -> In the Agentic Chat, send a message asking the assistant to open the what-if scenario panel and display scenario selection and an amount input so an invalid amount can be entered.
+        # Send message button
+        elem = page.get_by_role('button', name='Send message', exact=True)
         await elem.click(timeout=10000)
         
         # --> Assertions to verify final state
+        # Assert: Verify an amount validation error is shown
+        assert False, "Expected: Verify an amount validation error is shown (could not be verified on the page)"
         
-        # --> Verify an amount validation error is shown
-        # Assert: Expected the amount input to have aria-invalid='true' to indicate an amount validation error.
-        await expect(page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div[1]/form/div[2]/div[1]/div[2]/div/input").nth(0)).to_have_attribute("aria-invalid", "true", timeout=15000), "Expected the amount input to have aria-invalid='true' to indicate an amount validation error."
+        # --> Test blocked by environment/access constraints during agent run
+        # Reason: TEST BLOCKED The what-if scenario panel required for this test could not be reached or is not present in the UI, so the validation of an invalid Amount cannot be performed. Observations: - The Agentic Chat opened and replied, but it did not present or open a scenario selector or an Amount input field in the page UI. - The page contains the financial snapshot form (income, salary, expenses, rent...
+        raise AssertionError("Test blocked during agent run: " + "TEST BLOCKED The what-if scenario panel required for this test could not be reached or is not present in the UI, so the validation of an invalid Amount cannot be performed. Observations: - The Agentic Chat opened and replied, but it did not present or open a scenario selector or an Amount input field in the page UI. - The page contains the financial snapshot form (income, salary, expenses, rent..." + " — the exported script cannot reproduce a PASS in this environment.")
         await asyncio.sleep(5)
 
     finally:

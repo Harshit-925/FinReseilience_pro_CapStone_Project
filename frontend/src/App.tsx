@@ -159,6 +159,7 @@ export default function App() {
           <AuthPage
             initialMode={view === "signup" ? "signup" : "login"}
             onSwitchMode={(mode) => setView(mode)}
+            onBack={() => setView("landing")}
           />
         )}
 
@@ -197,7 +198,7 @@ export default function App() {
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
               <div style={{ display: "flex", background: "var(--c-bg)", padding: 4, borderRadius: 8, border: "1px solid var(--c-border)" }}>
                 <button
-                  onClick={() => setDashboardTab("analysis")}
+                  onClick={() => { setDashboardTab("analysis"); window.scrollTo({ top: 0, behavior: "instant" }); }}
                   style={{
                     padding: "8px 24px",
                     background: dashboardTab === "analysis" ? "var(--c-white)" : "transparent",
@@ -214,7 +215,7 @@ export default function App() {
                   Full Analysis
                 </button>
                 <button
-                  onClick={() => setDashboardTab("agent")}
+                  onClick={() => { setDashboardTab("agent"); window.scrollTo({ top: 0, behavior: "instant" }); }}
                   style={{
                     padding: "8px 24px",
                     background: dashboardTab === "agent" ? "var(--c-white)" : "transparent",

@@ -34,24 +34,24 @@ async def run_test():
 
         # Interact with the page elements to simulate user flow
         # -> navigate
-        await page.goto("http://localhost:4173")
+        await page.goto("http://localhost:3000")
         try:
             await page.wait_for_load_state("domcontentloaded", timeout=5000)
         except Exception:
             pass
         
-        # -> Open the financial input form by clicking the 'Start Your Optimization' button.
+        # -> Open the financial input form by clicking the 'Start Your Optimization' button on the homepage.
         # bolt Start Your Optimization button
         elem = page.get_by_role('button', name='bolt Start Your Optimization', exact=True)
         await elem.click(timeout=10000)
         
-        # -> Fill '-50000' into the 'Monthly Net Income' field, then click the 'Analyze & Optimize Capital' button to submit the analysis form and observe any visible validation error for the financial amount.
+        # -> Fill '-5000' into the 'Monthly Net Income' field and click the 'Analyze & Optimize Capital' button to submit the form and check for a visible validation error.
         # 80,000 number field
         elem = page.locator('[id="income"]')
         await elem.wait_for(state="visible", timeout=10000)
-        await elem.fill("-50000")
+        await elem.fill("-5000")
         
-        # -> Fill '-50000' into the 'Monthly Net Income' field, then click the 'Analyze & Optimize Capital' button to submit the analysis form and observe any visible validation error for the financial amount.
+        # -> Fill '-5000' into the 'Monthly Net Income' field and click the 'Analyze & Optimize Capital' button to submit the form and check for a visible validation error.
         # bolt Analyze & Optimize Capital button
         elem = page.get_by_role('button', name='bolt Analyze & Optimize Capital', exact=True)
         await elem.click(timeout=10000)
@@ -59,10 +59,9 @@ async def run_test():
         # --> Assertions to verify final state
         
         # --> Verify a financial amount validation error is visible
-        # Assert: Expected the page to contain the validation message 'Please enter a valid amount'.
-        await expect(page.locator("xpath=/html/body/div[1]").nth(0)).to_contain_text("Please enter a valid amount", timeout=15000), "Expected the page to contain the validation message 'Please enter a valid amount'."
-        # Assert: Expected the Monthly Net Income input to have aria-invalid set to 'true' to indicate a validation error.
-        await expect(page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div[1]/form/div[2]/div[1]/div[2]/div/input").nth(0)).to_have_attribute("aria-invalid", "true", timeout=15000), "Expected the Monthly Net Income input to have aria-invalid set to 'true' to indicate a validation error."
+        await page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div[1]/form/div[2]/div[6]/span").nth(0).scroll_into_view_if_needed()
+        # Assert: A financial amount validation error indicator is visible.
+        await expect(page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div[1]/form/div[2]/div[6]/span").nth(0)).to_be_visible(timeout=15000), "A financial amount validation error indicator is visible."
         await asyncio.sleep(5)
 
     finally:

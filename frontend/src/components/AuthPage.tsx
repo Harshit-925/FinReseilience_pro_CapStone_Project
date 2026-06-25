@@ -16,6 +16,7 @@ type AuthMode = "login" | "signup";
 interface AuthPageProps {
   initialMode?: AuthMode;
   onSwitchMode: (mode: AuthMode) => void;
+  onBack?: () => void;
 }
 
 /* ─── Icon chips config ─── */
@@ -208,7 +209,7 @@ function OrbitPanel() {
 }
 
 /* ─── Main AuthPage ─── */
-export default function AuthPage({ initialMode = "login", onSwitchMode }: AuthPageProps) {
+export default function AuthPage({ initialMode = "login", onSwitchMode, onBack }: AuthPageProps) {
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -625,6 +626,37 @@ export default function AuthPage({ initialMode = "login", onSwitchMode }: AuthPa
 
         <div className="auth-right">
           <div className="auth-card">
+            {/* Back to home */}
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: isDark ? "#9aa1b1" : "#64748b",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  fontFamily: "inherit",
+                  padding: 0,
+                  marginBottom: 24,
+                  transition: "color 0.15s",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.color = isDark ? "#ffffff" : "#0F172A")}
+                onMouseLeave={e => (e.currentTarget.style.color = isDark ? "#9aa1b1" : "#64748b")}
+                aria-label="Back to home"
+              >
+                <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 12H5M12 5l-7 7 7 7" />
+                </svg>
+                Back to Home
+              </button>
+            )}
+
             {/* Mode toggle pill */}
             <div className="auth-mode-switch" role="tablist">
               <button

@@ -34,28 +34,29 @@ async def run_test():
 
         # Interact with the page elements to simulate user flow
         # -> navigate
-        await page.goto("http://localhost:4173")
+        await page.goto("http://localhost:3000")
         try:
             await page.wait_for_load_state("domcontentloaded", timeout=5000)
         except Exception:
             pass
         
-        # -> Scroll down the page to reveal more UI and locate a 'Chat', 'Help', or 'Support' widget to open the chat panel.
-        await page.mouse.wheel(0, 300)
+        # -> Open the AI Assistant chat by clicking the 'Open AI Assistant' button so the chat panel becomes visible.
+        # Open AI Assistant button
+        elem = page.get_by_role('button', name='Open AI Assistant', exact=True)
+        await elem.click(timeout=10000)
         
-        # -> scroll
-        await page.mouse.wheel(0, 300)
-        
-        # -> Scroll down further to reveal any 'Chat', 'Help', or 'Support' widget (floating chat icon or support panel) and then open it if found.
-        await page.mouse.wheel(0, 300)
+        # -> Click the 'Send message' button in the chat panel without typing anything to confirm the UI prevents submitting an empty message or shows a validation state.
+        # Send message button
+        elem = page.get_by_role('button', name='Send message', exact=True)
+        await elem.click(timeout=10000)
         
         # --> Assertions to verify final state
-        # Assert: Verify an empty message validation state is shown
-        assert False, "Expected: Verify an empty message validation state is shown (could not be verified on the page)"
         
-        # --> Test blocked by environment/access constraints during agent run
-        # Reason: TEST BLOCKED The test could not be run because the chat/help widget required to attempt sending an empty message is not present on the homepage. Observations: - After scrolling to the footer and searching the page, no 'Chat', 'Help', or 'Support' widget or floating chat icon was found. - The interactive elements on the page include navigation links and a 'Contact' footer link, but no chat panel...
-        raise AssertionError("Test blocked during agent run: " + "TEST BLOCKED The test could not be run because the chat/help widget required to attempt sending an empty message is not present on the homepage. Observations: - After scrolling to the footer and searching the page, no 'Chat', 'Help', or 'Support' widget or floating chat icon was found. - The interactive elements on the page include navigation links and a 'Contact' footer link, but no chat panel..." + " — the exported script cannot reproduce a PASS in this environment.")
+        # --> Verify an empty message validation state is shown
+        # Assert: The Send message button is disabled when the input is empty.
+        await expect(page.locator("xpath=/html/body/div[1]/div/div/div/div/div/div[3]/button").nth(0)).to_have_attribute("disabled", "", timeout=15000), "The Send message button is disabled when the input is empty."
+        # Assert: The chat input is empty (no message entered).
+        await expect(page.locator("xpath=/html/body/div[1]/div/div/div/div/div/div[3]/textarea").nth(0)).to_have_value("", timeout=15000), "The chat input is empty (no message entered)."
         await asyncio.sleep(5)
 
     finally:

@@ -34,13 +34,13 @@ async def run_test():
 
         # Interact with the page elements to simulate user flow
         # -> navigate
-        await page.goto("http://localhost:4173")
+        await page.goto("http://localhost:3000")
         try:
             await page.wait_for_load_state("domcontentloaded", timeout=5000)
         except Exception:
             pass
         
-        # -> Click the 'Get Started Free' button in the header to start onboarding and navigate toward the main dashboard view.
+        # -> Click the 'Get Started Free' button on the landing page to begin onboarding and reach the main dashboard view.
         # Get Started Free button
         elem = page.get_by_role('button', name='Get Started Free', exact=True)
         await elem.click(timeout=10000)
@@ -48,12 +48,18 @@ async def run_test():
         # --> Assertions to verify final state
         
         # --> Verify the main dashboard view is displayed
-        await page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div[1]/form/div[2]/button").nth(0).scroll_into_view_if_needed()
-        # Assert: The primary 'Analyze & Optimize Capital' button is visible, confirming the main dashboard/onboarding view is displayed.
-        await expect(page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div[1]/form/div[2]/button").nth(0)).to_be_visible(timeout=15000), "The primary 'Analyze & Optimize Capital' button is visible, confirming the main dashboard/onboarding view is displayed."
-        await page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div[1]/form/div[2]/div[1]/div[2]/div/input").nth(0).scroll_into_view_if_needed()
-        # Assert: The Monthly Net Income input (placeholder '80,000') is visible on the dashboard, confirming the main view loaded.
-        await expect(page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div[1]/form/div[2]/div[1]/div[2]/div/input").nth(0)).to_be_visible(timeout=15000), "The Monthly Net Income input (placeholder '80,000') is visible on the dashboard, confirming the main view loaded."
+        await page.locator("xpath=/html/body/div/div/main/div/div[2]/div[1]/form/div[2]/button").nth(0).scroll_into_view_if_needed()
+        # Assert: The 'Analyze & Optimize Capital' button is visible on the dashboard.
+        await expect(page.locator("xpath=/html/body/div/div/main/div/div[2]/div[1]/form/div[2]/button").nth(0)).to_be_visible(timeout=15000), "The 'Analyze & Optimize Capital' button is visible on the dashboard."
+        await page.locator("xpath=/html/body/div/div/main/div/div[2]/div[1]/form/div[2]/div[1]/div[2]/div/input").nth(0).scroll_into_view_if_needed()
+        # Assert: The Monthly Net Income input field is present on the dashboard.
+        await expect(page.locator("xpath=/html/body/div/div/main/div/div[2]/div[1]/form/div[2]/div[1]/div[2]/div/input").nth(0)).to_be_visible(timeout=15000), "The Monthly Net Income input field is present on the dashboard."
+        await page.locator("xpath=/html/body/div/div/main/div/div[2]/div[1]/form/div[2]/div[1]/div[3]/div[1]/div/input").nth(0).scroll_into_view_if_needed()
+        # Assert: The Basic Salary input field is present on the dashboard.
+        await expect(page.locator("xpath=/html/body/div/div/main/div/div[2]/div[1]/form/div[2]/div[1]/div[3]/div[1]/div/input").nth(0)).to_be_visible(timeout=15000), "The Basic Salary input field is present on the dashboard."
+        await page.locator("xpath=/html/body/div/div/main/div/div[2]/div[1]/form/div[2]/div[3]/div[2]/div[1]/input").nth(0).scroll_into_view_if_needed()
+        # Assert: The 'Your Age' demographic input is present on the dashboard.
+        await expect(page.locator("xpath=/html/body/div/div/main/div/div[2]/div[1]/form/div[2]/div[3]/div[2]/div[1]/input").nth(0)).to_be_visible(timeout=15000), "The 'Your Age' demographic input is present on the dashboard."
         await asyncio.sleep(5)
 
     finally:

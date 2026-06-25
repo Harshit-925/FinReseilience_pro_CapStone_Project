@@ -34,38 +34,39 @@ async def run_test():
 
         # Interact with the page elements to simulate user flow
         # -> navigate
-        await page.goto("http://localhost:4173")
+        await page.goto("http://localhost:3000")
         try:
             await page.wait_for_load_state("domcontentloaded", timeout=5000)
         except Exception:
             pass
         
-        # -> Open the login form by clicking the 'Sign In' button so the email and password fields become available.
+        # -> Click the 'Sign In' button to open the login form so the email and password fields become available.
         # Sign In button
         elem = page.get_by_role('button', name='Sign In', exact=True)
         await elem.click(timeout=10000)
         
-        # -> input
-        # you@example.com email field
-        elem = page.locator('[id="login-email"]')
+        # -> Fill the email field with 'invalid-user@example.com' and the password field with 'invalid-password', then click the 'Sign in →' button to submit the form.
+        # Enter your email address email field
+        elem = page.locator('[id="auth-email"]')
         await elem.wait_for(state="visible", timeout=10000)
         await elem.fill("invalid-user@example.com")
         
-        # -> input
-        # Min 8 characters password field
-        elem = page.locator('[id="login-password"]')
+        # -> Fill the email field with 'invalid-user@example.com' and the password field with 'invalid-password', then click the 'Sign in →' button to submit the form.
+        # Enter your password password field
+        elem = page.locator('[id="auth-password"]')
         await elem.wait_for(state="visible", timeout=10000)
         await elem.fill("invalid-password")
         
-        # -> click
-        # Sign In button
-        elem = page.get_by_role('button', name='Sign In', exact=True)
+        # -> Fill the email field with 'invalid-user@example.com' and the password field with 'invalid-password', then click the 'Sign in →' button to submit the form.
+        # Sign in → button
+        elem = page.get_by_role('button', name='Sign in →', exact=True)
         await elem.click(timeout=10000)
         
         # --> Assertions to verify final state
-        current_url = await page.evaluate("() => window.location.href")
-        # Assert: page loaded with a URL (final outcome verified by the AI judge during the run)
-        assert current_url, 'Page should have loaded with a URL'
+        
+        # --> Verify a validation error is visible
+        # Assert: A validation error 'Invalid email or password' is visible.
+        await expect(page.locator("xpath=/html/body/div[1]/div/section").nth(0)).to_contain_text("Invalid email or password", timeout=15000), "A validation error 'Invalid email or password' is visible."
         await asyncio.sleep(5)
 
     finally:

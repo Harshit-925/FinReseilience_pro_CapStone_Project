@@ -104,7 +104,7 @@ async def agent_chat(payload: AgentChatRequest) -> AgentChatResponse:
         async def get_mcp_toolset() -> McpToolset:
             return McpToolset(
                 connection_params=SseConnectionParams(
-                    url=f"http://127.0.0.1:{MCP_PORT}/sse"
+                    url=MCP_SERVER_URL
                 )
             )
 
@@ -123,16 +123,17 @@ async def agent_chat(payload: AgentChatRequest) -> AgentChatResponse:
             tools=tools,
         )
 
-        # Get or create a session for this user
+        # Get or create a session for this user.
+        # InMemorySessionService.get_session returns None when not found
+        # (it does NOT raise), so we must check for None explicitly.
         session_id = payload.session_id or str(uuid.uuid4())
-        try:
-            session = session_service.get_session(
-                app_name="finresilience_concierge",
-                user_id=payload.user_id,
-                session_id=session_id,
-            )
-        except Exception:
-            session = session_service.create_session(
+        session = await session_service.get_session(
+            app_name="finresilience_concierge",
+            user_id=payload.user_id,
+            session_id=session_id,
+        )
+        if session is None:
+            session = await session_service.create_session(
                 app_name="finresilience_concierge",
                 user_id=payload.user_id,
                 session_id=session_id,
@@ -148,7 +149,7 @@ async def agent_chat(payload: AgentChatRequest) -> AgentChatResponse:
         final_text = ""
         async for event in runner.run_async(
             user_id=payload.user_id,
-            session_id=session_id,
+            session_id=session.id,
             new_message=_build_user_message(payload.message),
         ):
             # Collect tool call information from ADK events

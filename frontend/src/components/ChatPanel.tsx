@@ -68,9 +68,17 @@ export default function ChatPanel({ sessionId, profileSnapshot, onClose, style }
     setShowHistory(false);
   };
 
+  // Only auto-scroll when a NEW message is added or loading starts —
+  // NOT on initial mount or when switching dashboard tabs.
+  const prevMsgCount = useRef(messages.length);
   useEffect(() => {
-    endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+    const prevCount = prevMsgCount.current;
+    prevMsgCount.current = messages.length;
+    // scroll only if the count grew (new message arrived) or loading just started
+    if (messages.length > prevCount || isLoading) {
+      endOfMessagesRef.current?.scrollIntoView?.({ behavior: "smooth" });
+    }
+  }, [messages.length, isLoading]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -142,49 +150,97 @@ export default function ChatPanel({ sessionId, profileSnapshot, onClose, style }
         </div>
       </div>
 
+      {/* ── Compact History Dropdown ── */}
       {showHistory && (
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 20, display: "flex", flexDirection: "column" }}>
-          {/* Backdrop for click-outside */}
-          <div 
-            onClick={() => setShowHistory(false)} 
-            style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.2)", backdropFilter: "blur(2px)", zIndex: -1 }} 
+        <>
+          {/* Click-outside backdrop (transparent) */}
+          <div
+            onClick={() => setShowHistory(false)}
+            style={{ position: "fixed", inset: 0, zIndex: 18 }}
           />
-          
-          <div style={{ background: "var(--c-white)", width: "100%", height: "100%", display: "flex", flexDirection: "column", animation: "slideInTop 0.2s ease-out" }}>
-            <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--c-border)", background: "var(--c-bg)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontWeight: 600, color: "var(--c-navy)", display: "flex", alignItems: "center", gap: 8 }}>
-                <History size={18} />
-                <span>Past Sessions</span>
+          <div style={{
+            position: "absolute",
+            top: 57,        // just below the header
+            right: 8,
+            width: 280,
+            maxHeight: 320,
+            zIndex: 19,
+            background: "var(--c-white)",
+            borderRadius: 12,
+            boxShadow: "0 8px 28px rgba(0,0,0,0.14)",
+            border: "1px solid var(--c-border)",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            animation: "dropdownFade 0.18s ease-out",
+          }}>
+            {/* Dropdown header */}
+            <div style={{
+              padding: "10px 14px",
+              borderBottom: "1px solid var(--c-border)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: "var(--c-bg)",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600, fontSize: 13, color: "var(--c-navy)" }}>
+                <History size={14} />
+                Past Sessions
               </div>
-              <button onClick={() => setShowHistory(false)} style={{ background: "none", border: "none", color: "var(--c-muted)", cursor: "pointer", display: "flex", alignItems: "center" }}>
-                <X size={20} />
+              <button
+                onClick={() => setShowHistory(false)}
+                style={{ background: "none", border: "none", color: "var(--c-muted)", cursor: "pointer", display: "flex", padding: 2 }}
+              >
+                <X size={14} />
               </button>
             </div>
-            <div style={{ flex: 1, overflowY: "auto", padding: "12px 0" }}>
+
+            {/* Session list */}
+            <div style={{ overflowY: "auto", flex: 1 }}>
               {sessions.length === 0 ? (
-                <div style={{ padding: 20, color: "var(--c-muted)", textAlign: "center", fontSize: 14 }}>No previous sessions found.</div>
+                <div style={{ padding: "18px 14px", color: "var(--c-muted)", textAlign: "center", fontSize: 13 }}>
+                  No previous sessions found.
+                </div>
               ) : (
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                  {sessions.map(s => (
-                    <li key={s.session_id}>
-                      <button 
-                        onClick={() => handleSelectSession(s.session_id)} 
-                        className="history-session-btn"
-                        style={{ width: "100%", padding: "12px 20px", background: "none", border: "none", borderBottom: "1px solid rgba(0,0,0,0.05)", textAlign: "left", cursor: "pointer", transition: "all 0.2s" }}
-                      >
-                        <div style={{ fontWeight: 500, color: "var(--c-navy)", marginBottom: 4, display: "flex", justifyContent: "space-between" }}>
-                          <span>Session {s.session_id.slice(0,8)}</span>
-                          <span style={{ fontSize: 12, color: "var(--c-emerald)", fontWeight: 600 }}>Resume</span>
-                        </div>
-                        <div style={{ fontSize: 12, color: "var(--c-muted)" }}>{new Date(s.created).toLocaleString()}</div>
-                      </button>
-                    </li>
-                  ))}
+                  {sessions.map((s, idx) => {
+                    const date = new Date(s.created);
+                    const dateStr = date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+                    const timeStr = date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+                    const title = `Chat ${idx + 1} — ${s.session_id.slice(0, 6).toUpperCase()}`;
+                    return (
+                      <li key={s.session_id}>
+                        <button
+                          onClick={() => handleSelectSession(s.session_id)}
+                          className="history-session-btn"
+                          style={{
+                            width: "100%",
+                            padding: "10px 14px",
+                            background: "none",
+                            border: "none",
+                            borderBottom: "1px solid rgba(0,0,0,0.05)",
+                            textAlign: "left",
+                            cursor: "pointer",
+                            transition: "background 0.15s",
+                          }}
+                        >
+                          <div style={{ fontWeight: 600, fontSize: 13, color: "var(--c-navy)", marginBottom: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            {title}
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "var(--c-muted)" }}>
+                            <span>{dateStr}</span>
+                            <span style={{ width: 3, height: 3, borderRadius: "50%", background: "var(--c-muted)", display: "inline-block" }} />
+                            <span>{timeStr}</span>
+                          </div>
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Messages */}
@@ -273,9 +329,9 @@ export default function ChatPanel({ sessionId, profileSnapshot, onClose, style }
         .markdown-body p:last-child { margin-bottom: 0; }
         .markdown-body strong { font-weight: 600; color: var(--c-navy); }
         .history-session-btn:hover { background: var(--c-emerald-lt) !important; }
-        @keyframes slideInTop {
-          from { transform: translateY(-10px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
+        @keyframes dropdownFade {
+          from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0)    scale(1);    }
         }
       `}</style>
     </div>

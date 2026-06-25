@@ -34,48 +34,48 @@ async def run_test():
 
         # Interact with the page elements to simulate user flow
         # -> navigate
-        await page.goto("http://localhost:4173")
+        await page.goto("http://localhost:3000")
         try:
             await page.wait_for_load_state("domcontentloaded", timeout=5000)
         except Exception:
             pass
         
-        # -> Click the 'Get Started Free' button on the homepage to open the sign-up form or sign-up modal.
+        # -> Click the 'Get Started Free' button to open the sign-up form.
         # Get Started Free button
         elem = page.get_by_role('button', name='Get Started Free', exact=True)
         await elem.click(timeout=10000)
         
-        # -> Click the 'Sign Up' button in the page header to open the registration form so the email and password fields can be filled.
+        # -> Click the 'Sign Up' button in the top-right of the page to open the sign-up form.
         # Sign Up button
         elem = page.get_by_role('button', name='Sign Up', exact=True)
         await elem.click(timeout=10000)
         
-        # -> Fill the email field with example@gmail.com and password field with password123, then submit the registration form by clicking the 'Create Account' button.
-        # you@example.com email field
-        elem = page.locator('[id="signup-email"]')
+        # -> Fill the 'Email' field with example@gmail.com, fill the 'Password' field with password123, then click the 'Create account →' button to submit the sign-up form.
+        # Enter your email address email field
+        elem = page.locator('[id="auth-email"]')
         await elem.wait_for(state="visible", timeout=10000)
         await elem.fill("example@gmail.com")
         
-        # -> Fill the email field with example@gmail.com and password field with password123, then submit the registration form by clicking the 'Create Account' button.
+        # -> Fill the 'Email' field with example@gmail.com, fill the 'Password' field with password123, then click the 'Create account →' button to submit the sign-up form.
         # Min 8 characters password field
-        elem = page.locator('[id="signup-password"]')
+        elem = page.locator('[id="auth-password"]')
         await elem.wait_for(state="visible", timeout=10000)
         await elem.fill("password123")
         
-        # -> Fill the email field with example@gmail.com and password field with password123, then submit the registration form by clicking the 'Create Account' button.
-        # Create Account button
-        elem = page.get_by_role('button', name='Create Account', exact=True)
+        # -> Fill the 'Email' field with example@gmail.com, fill the 'Password' field with password123, then click the 'Create account →' button to submit the sign-up form.
+        # Create account → button
+        elem = page.get_by_role('button', name='Create account →', exact=True)
         await elem.click(timeout=10000)
         
         # --> Assertions to verify final state
         
         # --> Verify the authenticated dashboard is displayed
-        # Assert: The header displays the authenticated user's email (example@gmail.com).
-        await expect(page.locator("xpath=/html/body/div[1]").nth(0)).to_contain_text("example@gmail.com", timeout=15000), "The header displays the authenticated user's email (example@gmail.com)."
-        # Assert: A 'Log Out' button is visible in the header indicating an active session.
-        await expect(page.locator("xpath=/html/body/div[1]/div/main/header/div/nav/button[2]").nth(0)).to_have_text("Log Out", timeout=15000), "A 'Log Out' button is visible in the header indicating an active session."
-        # Assert: The dashboard shows the 'Analyze & Optimize Capital' action confirming access to the authenticated dashboard.
-        await expect(page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div[1]/form/div[2]/button").nth(0)).to_contain_text("Analyze & Optimize Capital", timeout=15000), "The dashboard shows the 'Analyze & Optimize Capital' action confirming access to the authenticated dashboard."
+        await page.locator("xpath=/html/body/div[1]/div/main/header/div/nav/div/button").nth(0).scroll_into_view_if_needed()
+        # Assert: The user avatar with initial 'E' is visible in the top-right, indicating an authenticated session.
+        await expect(page.locator("xpath=/html/body/div[1]/div/main/header/div/nav/div/button").nth(0)).to_be_visible(timeout=15000), "The user avatar with initial 'E' is visible in the top-right, indicating an authenticated session."
+        await page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div[1]/form/div[2]/button").nth(0).scroll_into_view_if_needed()
+        # Assert: The dashboard action 'Analyze & Optimize Capital' is visible, confirming the authenticated dashboard is displayed.
+        await expect(page.locator("xpath=/html/body/div[1]/div/main/div/div[2]/div[1]/form/div[2]/button").nth(0)).to_be_visible(timeout=15000), "The dashboard action 'Analyze & Optimize Capital' is visible, confirming the authenticated dashboard is displayed."
         await asyncio.sleep(5)
 
     finally:
