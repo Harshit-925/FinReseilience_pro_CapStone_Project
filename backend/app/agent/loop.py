@@ -51,11 +51,11 @@ try:
     from google.adk.agents.llm_agent import LlmAgent
 
     def adk_run_avalanche(debts: list, monthly_surplus: float) -> dict:
-        """Calculate the optimal debt payoff schedule using the Avalanche method."""
+        """Calculate the optimal debt payoff schedule using the Avalanche method. (Note: Stub for ADK tool-schema introspection)"""
         return {}
 
     def adk_run_tax_shield(annual_income: float, basic_salary: float, tax_regime: str, city_type: str) -> dict:
-        """Calculate optimal tax-saving investment recommendations."""
+        """Calculate optimal tax-saving investment recommendations. (Note: Stub for ADK tool-schema introspection)"""
         return {}
 
     FinancialAdvisorAgent = LlmAgent(

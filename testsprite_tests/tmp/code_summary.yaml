@@ -1,0 +1,27 @@
+tech_stack:
+  frontend:
+    - React 18
+    - TypeScript
+    - Vite
+    - Zustand
+    - Framer Motion
+    - Tailwind CSS
+  backend:
+    - FastAPI
+    - Python 3.11+
+    - Google ADK
+    - MCP Protocol
+  database:
+    - PocketBase (SQLite)
+  infrastructure:
+    - Docker
+
+features:
+  - Deterministic Math Engine for financial planning
+  - Debt Avalanche Algorithm optimization
+  - Indian Tax Law (80C/80D/HRA) optimization
+  - FOIR Health Score (RBI benchmark) calculation
+  - Privacy-First Execution (in-memory)
+  - Accessible & Ambient UI (WCAG 2.1 AA)
+  - AI fallback resilience
+  - Type-safe API contracts

@@ -1,0 +1,90 @@
+/// <reference path="../pb_data/types.d.ts" />
+
+migrate(
+  (app) => {
+    // --- chat_sessions collection ---
+    const chatSessions = new Collection({
+      name: "chat_sessions",
+      type: "base",
+      fields: [
+        {
+          name: "user_id",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "session_id",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "user_message",
+          type: "text",
+          required: false,
+        },
+        {
+          name: "agent_reply",
+          type: "text",
+          required: false,
+        },
+        {
+          name: "tool_calls_made",
+          type: "json",
+          required: false,
+        },
+      ],
+      listRule: "user_id = @request.auth.id",
+      viewRule: "user_id = @request.auth.id",
+      createRule: "user_id = @request.auth.id",
+      updateRule: "user_id = @request.auth.id",
+      deleteRule: "user_id = @request.auth.id",
+    });
+    app.save(chatSessions);
+
+    // --- notifications collection ---
+    const notifications = new Collection({
+      name: "notifications",
+      type: "base",
+      fields: [
+        {
+          name: "user_id",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "type",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "message",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "read",
+          type: "bool",
+          required: false,
+        },
+      ],
+      listRule: "user_id = @request.auth.id",
+      viewRule: "user_id = @request.auth.id",
+      createRule: "user_id = @request.auth.id",
+      updateRule: "user_id = @request.auth.id",
+      deleteRule: "user_id = @request.auth.id",
+    });
+    app.save(notifications);
+  },
+  (app) => {
+    // Rollback
+    const collections = ["chat_sessions", "notifications"];
+    for (const name of collections) {
+      try {
+        const col = app.findCollectionByNameOrId(name);
+        app.delete(col);
+      } catch (e) {
+        // Ignore if not found
+      }
+    }
+  }
+);

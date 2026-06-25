@@ -54,9 +54,48 @@ This platform evaluates debt using the **Avalanche Method**, optimizes domestic 
 
 The application is structured into a secure, privacy-first topology consisting of a React frontend, a FastAPI proxy, a dedicated Agent Server powered by Google ADK, and an isolated MCP tool execution server.
 
-![Architecture Flow](docs/architecture.png)
+```mermaid
+graph TD
+    %% Define Styles
+    classDef frontend fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff;
+    classDef proxy fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff;
+    classDef agent fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:#fff;
+    classDef mcp fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff;
+    classDef db fill:#475569,stroke:#334155,stroke-width:2px,color:#fff;
+
+    %% Nodes
+    User([User / Browser])
+    UI["React Frontend<br/>(Vite)"]:::frontend
+    API["Backend Proxy<br/>(FastAPI)"]:::proxy
+    DB[("PocketBase<br/>(Auth/DB)")]:::db
+    
+    subgraph Privacy Boundary
+        Agent["Google ADK Agent<br/>(Concierge Runner)"]:::agent
+        MCP["MCP Math Server<br/>(FastMCP SSE)"]:::mcp
+        Engine["Deterministic Engine<br/>(Avalanche/Tax/FOIR)"]:::mcp
+    end
+
+    %% Flow
+    User -->|Chat / Inputs| UI
+    UI -->|REST Payload| API
+    API -->|Proxies turn| Agent
+    
+    Agent -->|Calls Math Tools| MCP
+    MCP -->|Calculates| Engine
+    Engine -.->|Returns precise figures| MCP
+    MCP -.->|Tool Response| Agent
+    
+    Agent -->|Formulates Advice| API
+    API -->|Validated Reply| UI
+    UI -->|Persists History| DB
+```
 
 ---
+
+## 🤖 Antigravity Agent & Custom Skills Integration
+
+This project was actively iterated and developed using the **Antigravity** agent platform. 
+We've extended the platform's capabilities by including a custom **FinResilience Agent Skill** (located in `skills/finresilience_optimizer/SKILL.md`). This allows other agents to instantly grasp our financial engine's mathematical approach (Avalanche debt, IT Act 1961 tax laws) and utilize our MCP server autonomously in their own workflows.
 
 ## 🛠️ Technology Stack
 
