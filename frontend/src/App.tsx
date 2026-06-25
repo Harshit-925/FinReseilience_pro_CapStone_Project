@@ -21,6 +21,7 @@ import UserProfileMenu from "./components/UserProfileMenu";
 import PaymentPage from "./components/PaymentPage";
 import PricingPage from "./components/PricingPage";
 import NewsPage from "./components/NewsPage";
+import Footer from "./components/Footer";
 import { getNotifications } from "./api/chat";
 import type { NotificationPayload } from "./api/chat";
 
@@ -33,7 +34,6 @@ export default function App() {
   const { result, lastInput } = useAppStore();
   const { theme } = useThemeStore();
   const [view, setView] = useState<View>("landing");
-  const [selectedPlan, setSelectedPlan] = useState<PlanTier | null>(null);
   const [dashboardTab, setDashboardTab] = useState<DashboardTab>("analysis");
   const [notifications, setNotifications] = useState<NotificationPayload[]>([]);
 
@@ -163,26 +163,27 @@ export default function App() {
           />
         )}
 
-        {/* ── PRICING PAGE ── */}
-        {view === "pricing" && (
-          <PricingPage 
-            onBack={() => setView("landing")}
-            onSubscribe={(plan) => {
-              setSelectedPlan(plan);
-              setView("payment");
-            }}
-          />
-        )}
+
 
         {/* ── NEWS PAGE ── */}
         {view === "news" && (
           <NewsPage onBack={() => setView("landing")} />
         )}
 
+        {/* ── PRICING PAGE ── */}
+        {view === "pricing" && (
+          <PricingPage 
+            onBack={() => setView("landing")}
+            onSubscribe={() => {
+              setView("payment");
+            }}
+          />
+        )}
+
         {/* ── PAYMENT PAGE ── */}
         {view === "payment" && (
           <PaymentPage 
-            plan={selectedPlan}
+            plan={null}
             onBack={() => setView("landing")}
             onSuccess={() => {
               setView(isAuthenticated ? "dashboard" : "signup");
@@ -302,6 +303,9 @@ export default function App() {
         )}
 
       </main>
+      
+      {/* Footer is global and appears on every page except Auth pages and Dashboard inside its own scrolling, but actually wait, we want it on App.tsx bottom */}
+      {view !== "login" && view !== "signup" && <Footer />}
 
       {/* Global AI Agent Widget */}
       <FloatingChatWidget sessionId={isAuthenticated ? user?.id || "anon" : "anon"} profileSnapshot={lastInput || undefined} />

@@ -215,7 +215,7 @@ export default function AuthPage({ initialMode = "login", onSwitchMode, onBack }
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
-  const { login, signup, isLoading } = useAuthStore();
+  const { login, signup, loginWithGoogle, isLoading } = useAuthStore();
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
 
@@ -342,8 +342,8 @@ export default function AuthPage({ initialMode = "login", onSwitchMode, onBack }
           flex: 0.85;
           background: ${isDark ? "#0c0f1a" : "#ffffff"};
           display: flex;
+          flex-direction: column;
           align-items: center;
-          justify-content: center;
           border-left: 1px solid ${isDark ? "#14171f" : "#e2e8f0"};
           overflow-y: auto;
         }
@@ -351,6 +351,7 @@ export default function AuthPage({ initialMode = "login", onSwitchMode, onBack }
           width: 100%;
           max-width: 420px;
           padding: 40px;
+          margin: auto;
         }
         .auth-card h2 {
           font-size: 34px;
@@ -684,9 +685,23 @@ export default function AuthPage({ initialMode = "login", onSwitchMode, onBack }
                 : "Start optimizing your finances in under a minute"}
             </p>
 
-            {/* Google SSO (UI only) */}
+            {/* Google SSO */}
             <GlowFieldBtn onMouseMove={updateGlowFieldBtn}>
-              <button className="auth-gbtn" type="button">
+              <button 
+                className="auth-gbtn" 
+                type="button" 
+                onClick={async () => {
+                  try {
+                    await loginWithGoogle();
+                    toast.success("Successfully logged in with Google!");
+                  } catch (err: any) {
+                    if (err.message) {
+                      toast.error(err.message);
+                    }
+                  }
+                }}
+                disabled={isLoading}
+              >
                 <svg width={18} height={18} viewBox="0 0 48 48">
                   <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.4 29.3 35 24 35c-6.1 0-11-4.9-11-11s4.9-11 11-11c2.8 0 5.3 1 7.3 2.7l5.7-5.7C33.7 6.5 29.1 4.5 24 4.5 13.8 4.5 5.5 12.8 5.5 23S13.8 41.5 24 41.5c10.2 0 18.5-8.3 18.5-18.5 0-1.2-.1-2.4-.4-3.4z"/>
                   <path fill="#FF3D00" d="M6.9 14.3l6.6 4.8C15.3 16 19.3 13.5 24 13.5c2.8 0 5.3 1 7.3 2.7l5.7-5.7C33.7 6.5 29.1 4.5 24 4.5c-7.6 0-14.1 4.3-17.1 9.8z"/>

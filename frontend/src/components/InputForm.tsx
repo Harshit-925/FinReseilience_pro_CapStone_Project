@@ -96,6 +96,17 @@ export default function InputForm() {
 
       {/* ── Card Body ── */}
       <div style={{ background: "var(--c-white)", border: "1px solid var(--c-border)", borderTop: "none", borderRadius: "0 0 8px 8px", padding: "24px" }}>
+        
+        {/* Sticky Progress Indicator */}
+        <div style={{ position: "sticky", top: 64, background: "rgba(255,255,255,0.9)", backdropFilter: "blur(4px)", zIndex: 10, padding: "10px 0", marginBottom: 24, borderBottom: "1px solid var(--c-border)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, fontWeight: 700, color: "var(--c-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
+            <span>Profile Completion</span>
+            <span>{Math.round(((form.monthly_income ? 1 : 0) + (form.age_self ? 1 : 0) + (form.monthly_rent ? 1 : 0) + (form.monthly_expenses ? 1 : 0)) / 4 * 100)}%</span>
+          </div>
+          <div style={{ height: 4, width: "100%", background: "var(--c-border)", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ height: "100%", background: "var(--c-emerald)", width: `${Math.round(((form.monthly_income ? 1 : 0) + (form.age_self ? 1 : 0) + (form.monthly_rent ? 1 : 0) + (form.monthly_expenses ? 1 : 0)) / 4 * 100)}%`, transition: "width 0.3s ease" }} />
+          </div>
+        </div>
 
         {/* Income & Salary */}
         <div style={S.section}>
@@ -143,7 +154,7 @@ export default function InputForm() {
             <span className="material-symbols-outlined" style={{ fontSize: 15, color: "var(--c-emerald)", fontVariationSettings: "'FILL' 1" }}>person</span>
             Demographics & Tax
           </div>
-          <div style={{ ...S.grid2, marginBottom: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 14, marginBottom: 14 }}>
             <div>
               <label htmlFor="age" style={S.label}>Your Age</label>
               <input id="age" type="number" className="input-field" value={form.age_self || ""} placeholder="30" onChange={e => set("age_self", Number(e.target.value))} />
@@ -232,22 +243,24 @@ export default function InputForm() {
             </button>
           </div>
           {form.existing_investments.map((inv, i) => (
-            <div key={i} style={{ display: "grid", gridTemplateColumns: "100px 1fr 1fr 36px", gap: 10, marginBottom: 10, alignItems: "end" }}>
-              <div>
-                <label style={S.label}>Section</label>
-                <select className="input-field" value={inv.section} onChange={e => updateInv(i, "section", e.target.value)}>
-                  {["80C","80CCC","80CCD(1B)","80D","80E"].map(s => <option key={s}>{s}</option>)}
-                </select>
-              </div>
-              <div>
-                <label style={S.label}>Instrument</label>
-                <input type="text" className="input-field" value={inv.instrument} onChange={e => updateInv(i, "instrument", e.target.value)} placeholder="e.g. PPF, ELSS" />
-              </div>
-              <div>
-                <label style={S.label}>Amount (₹)</label>
-                <div style={{ position: "relative" }}>
-                  <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--c-muted)", pointerEvents: "none" }}>₹</span>
-                  <input type="number" className="input-field" style={{ paddingLeft: 22 }} value={inv.amount || ""} onChange={e => updateInv(i, "amount", Number(e.target.value))} />
+            <div key={i} style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 10, alignItems: "end" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: 10, alignItems: "end", flex: 1 }}>
+                <div>
+                  <label style={S.label}>Section</label>
+                  <select className="input-field" value={inv.section} onChange={e => updateInv(i, "section", e.target.value)}>
+                    {["80C","80CCC","80CCD(1B)","80D","80E"].map(s => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={S.label}>Instrument</label>
+                  <input type="text" className="input-field" value={inv.instrument} onChange={e => updateInv(i, "instrument", e.target.value)} placeholder="e.g. PPF, ELSS" />
+                </div>
+                <div>
+                  <label style={S.label}>Amount (₹)</label>
+                  <div style={{ position: "relative" }}>
+                    <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--c-muted)", pointerEvents: "none" }}>₹</span>
+                    <input type="number" className="input-field" style={{ paddingLeft: 22 }} value={inv.amount || ""} onChange={e => updateInv(i, "amount", Number(e.target.value))} />
+                  </div>
                 </div>
               </div>
               <button type="button" onClick={() => removeInv(i)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--c-muted)", padding: "10px 4px", borderRadius: 4, transition: "color 0.15s" }}

@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import type { AnalysisResponse } from "../types";
+import { formatCurrency } from "../utils/formatters";
 
 interface ResultsPanelProps {
   result: AnalysisResponse;
@@ -29,16 +30,6 @@ const cardVariants = {
   }),
 };
 
-function formatCurrency(amount: number): string {
-  return `₹${amount.toLocaleString("en-IN", {
-    maximumFractionDigits: 0,
-  })}`;
-}
-
-
-
-
-
 export default function ResultsPanel({ result }: ResultsPanelProps) {
   const [scheduleExpanded, setScheduleExpanded] = useState(false);
 
@@ -48,6 +39,17 @@ export default function ResultsPanel({ result }: ResultsPanelProps) {
       id: "fallback-warning",
     });
   }
+
+  // Calculate some summaries for the header
+  const totalActionAmount = result.action_cards.reduce((sum, c) => sum + c.amount, 0);
+  const taxShields = result.action_cards.filter(c => c.action_type === 'INVEST_TAX');
+  const totalTaxInvestments = taxShields.reduce((sum, c) => sum + c.amount, 0);
+  const emergencyCard = result.action_cards.find(c => c.destination === 'PIGGY_BANK' || (c.action_type as string) === 'PIGGY_BANK');
+  const emergencyAmount = emergencyCard ? emergencyCard.amount : 0;
+  
+  const investableActions = result.action_cards.filter(c => c.action_type === 'PAY_DEBT' || (c.action_type === 'INVEST_TAX' && c.destination !== 'HRA'));
+  const claimActions = result.action_cards.filter(c => c.destination === 'HRA');
+  const bufferActions = result.action_cards.filter(c => c.destination === 'PIGGY_BANK' || (c.action_type as string) === 'PIGGY_BANK');
 
   return (
     <motion.div
@@ -71,35 +73,130 @@ export default function ResultsPanel({ result }: ResultsPanelProps) {
           <h2 id="action-heading" className="text-lg font-headline font-bold text-slate-900 uppercase tracking-widest">Next Rupee Allocation</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {result.action_cards.map((card, i) => (
-            <motion.div
-              key={card.priority}
-              custom={i}
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-              className="bg-white border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden"
-            >
-              {/* Top color bar depending on action type */}
-              <div className={`absolute top-0 left-0 w-full h-1 ${card.action_type === 'PAY_DEBT' ? 'bg-red-500' : card.action_type === 'INVEST_TAX' ? 'bg-blue-500' : 'bg-emerald-500'}`}></div>
-              
-              <div>
-                <div className="flex justify-between items-start mb-4 mt-1">
-                  <span className={`material-symbols-outlined p-2 rounded ${card.action_type === 'PAY_DEBT' ? 'bg-red-50 text-red-600' : card.action_type === 'INVEST_TAX' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                    {card.action_type === 'PAY_DEBT' ? 'trending_down' : card.action_type === 'INVEST_TAX' ? 'savings' : 'piggy_bank'}
-                  </span>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter bg-slate-50 px-2 py-0.5 border border-slate-200">Priority 0{card.priority}</span>
-                </div>
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{card.destination}</h3>
-                <p className="text-2xl font-headline font-extrabold text-slate-900">{formatCurrency(card.amount)}<span className="text-sm font-normal text-slate-400">/mo</span></p>
-                <p className="text-xs text-slate-500 mt-3 leading-relaxed">{card.rationale}</p>
+        {/* Summary Header */}
+        <div className="bg-slate-900 text-white p-4 rounded-t-lg mb-4 flex flex-col md:flex-row md:justify-between items-center shadow-sm">
+          <div className="font-bold tracking-wide">
+            THIS MONTH'S {formatCurrency(totalActionAmount)} SURPLUS
+          </div>
+          <div className="text-sm text-slate-300">
+            {formatCurrency(totalTaxInvestments)} in investable tax shields · {formatCurrency(emergencyAmount)} to emergency
+          </div>
+        </div>
+
+        <div className="space-y-8">
+          
+          {/* INVESTABLE ACTIONS */}
+          {investableActions.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4 border-b border-slate-200 pb-2">Investable Actions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {investableActions.map((card, i) => (
+                  <motion.div
+                    key={card.priority}
+                    custom={i}
+                    variants={cardVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="bg-white border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden"
+                  >
+                    <div className={`absolute top-0 left-0 w-full h-1 ${card.action_type === 'PAY_DEBT' ? 'bg-red-500' : 'bg-blue-500'}`}></div>
+                    <div>
+                      <div className="flex justify-between items-start mb-4 mt-1">
+                        <span className={`material-symbols-outlined p-2 rounded ${card.action_type === 'PAY_DEBT' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
+                          {card.action_type === 'PAY_DEBT' ? 'trending_down' : 'savings'}
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter bg-slate-50 px-2 py-0.5 border border-slate-200">Priority 0{card.priority}</span>
+                      </div>
+                      <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{card.destination}</h3>
+                      <p className="text-2xl font-headline font-extrabold text-slate-900">{formatCurrency(card.amount)}<span className="text-sm font-normal text-slate-400">/mo</span></p>
+                      <p className="text-xs text-slate-500 mt-3 leading-relaxed">{card.rationale}</p>
+                    </div>
+                    <div className="mt-6 pt-4 border-t border-slate-100">
+                      <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-2">{card.impact_metric}</p>
+                      {/* Fake Progress Bar to represent filling the bucket */}
+                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <div className={`h-full ${card.action_type === 'PAY_DEBT' ? 'bg-red-400' : 'bg-blue-400'}`} style={{ width: '40%' }}></div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
-              <div className="mt-6 pt-4 border-t border-slate-100">
-                <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">{card.impact_metric}</p>
+            </div>
+          )}
+
+          {/* CLAIM ACTIONS */}
+          {claimActions.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4 border-b border-slate-200 pb-2">Claim, don't invest</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {claimActions.map((card, i) => (
+                  <motion.div
+                    key={card.priority}
+                    custom={i}
+                    variants={cardVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="bg-white border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 left-0 w-full h-1 bg-purple-500"></div>
+                    <div>
+                      <div className="flex justify-between items-start mb-4 mt-1">
+                        <span className="material-symbols-outlined p-2 rounded bg-purple-50 text-purple-600">
+                          receipt_long
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter bg-slate-50 px-2 py-0.5 border border-slate-200">Priority 0{card.priority}</span>
+                      </div>
+                      <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">HRA Exemption</h3>
+                      <p className="text-2xl font-headline font-extrabold text-slate-900">Claim {formatCurrency(card.amount)}<span className="text-sm font-normal text-slate-400"> on rent paid</span></p>
+                      <p className="text-xs text-slate-500 mt-3 leading-relaxed">{card.rationale}</p>
+                    </div>
+                    <div className="mt-6 pt-4 border-t border-slate-100">
+                      <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">{card.impact_metric} · requires rent receipts</p>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
-            </motion.div>
-          ))}
+            </div>
+          )}
+
+          {/* BUFFER ACTIONS */}
+          {bufferActions.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4 border-b border-slate-200 pb-2">Build buffer</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {bufferActions.map((card, i) => (
+                  <motion.div
+                    key={card.priority}
+                    custom={i}
+                    variants={cardVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="bg-white border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+                    <div>
+                      <div className="flex justify-between items-start mb-4 mt-1">
+                        <span className="material-symbols-outlined p-2 rounded bg-emerald-50 text-emerald-600">
+                          account_balance_wallet
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter bg-slate-50 px-2 py-0.5 border border-slate-200">Priority 0{card.priority}</span>
+                      </div>
+                      <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Emergency Fund</h3>
+                      <p className="text-2xl font-headline font-extrabold text-slate-900">{formatCurrency(card.amount)}<span className="text-sm font-normal text-slate-400">/mo</span></p>
+                      <p className="text-xs text-slate-500 mt-3 leading-relaxed">{card.rationale}</p>
+                    </div>
+                    <div className="mt-6 pt-4 border-t border-slate-100">
+                      <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-2">{card.impact_metric}</p>
+                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-emerald-400" style={{ width: '25%' }}></div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
         </div>
       </section>
 

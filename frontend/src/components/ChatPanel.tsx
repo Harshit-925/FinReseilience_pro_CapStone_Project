@@ -276,6 +276,30 @@ export default function ChatPanel({ sessionId, profileSnapshot, onClose, style }
             </div>
           </div>
         ))}
+        
+        {/* Empty State Prompt Chips */}
+        {messages.length <= 1 && !isLoading && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
+            {["Should I prepay or invest?", "What's my FOIR?", "How much tax can I save?"].map(prompt => (
+              <button
+                key={prompt}
+                onClick={() => { setInput(prompt); setTimeout(() => {
+                    const sendBtn = document.getElementById("chat-send-btn");
+                    if(sendBtn) sendBtn.click();
+                  }, 50); 
+                }}
+                className="chat-prompt-chip"
+                style={{
+                  background: "var(--c-white)", border: "1px solid var(--c-border)", borderRadius: 16,
+                  padding: "8px 16px", fontSize: 13, color: "var(--c-navy)", cursor: "pointer", transition: "all 0.2s",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
+                }}
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+        )}
 
         {isLoading && (
           <div style={{ display: "flex", gap: 12 }}>
@@ -300,6 +324,7 @@ export default function ChatPanel({ sessionId, profileSnapshot, onClose, style }
           style={{ flex: 1, resize: "none", height: 44, padding: "12px 16px", borderRadius: 8, border: "1px solid var(--c-border)", fontSize: 14, fontFamily: "inherit" }}
         />
         <button
+          id="chat-send-btn"
           onClick={handleSend}
           disabled={!input.trim() || isLoading}
           className="btn-primary"
@@ -329,6 +354,7 @@ export default function ChatPanel({ sessionId, profileSnapshot, onClose, style }
         .markdown-body p:last-child { margin-bottom: 0; }
         .markdown-body strong { font-weight: 600; color: var(--c-navy); }
         .history-session-btn:hover { background: var(--c-emerald-lt) !important; }
+        .chat-prompt-chip:hover { border-color: var(--c-emerald) !important; color: var(--c-emerald) !important; }
         @keyframes dropdownFade {
           from { opacity: 0; transform: translateY(-6px) scale(0.97); }
           to   { opacity: 1; transform: translateY(0)    scale(1);    }

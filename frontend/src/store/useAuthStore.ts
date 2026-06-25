@@ -12,6 +12,7 @@ interface AuthState {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   logout: () => void;
 }
 
@@ -50,6 +51,22 @@ export const useAuthStore = create<AuthState>((set) => {
       } catch {
         set({ isLoading: false });
         throw new Error("Invalid email or password");
+      }
+    },
+
+    loginWithGoogle: async () => {
+      set({ isLoading: true });
+      try {
+        const authData = await pb.collection("users").authWithOAuth2({ provider: "google" });
+        set({
+          user: { id: authData.record.id, email: authData.record.email as string },
+          isAuthenticated: true,
+          isLoading: false,
+        });
+      } catch (err: any) {
+        set({ isLoading: false });
+        if (err?.isAbort) return; // user closed popup
+        throw new Error("Google login failed. Did you configure the provider in PocketBase Admin?");
       }
     },
 

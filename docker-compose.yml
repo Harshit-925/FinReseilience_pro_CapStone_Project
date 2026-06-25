@@ -9,7 +9,7 @@ services:
       - ./pb_public:/pb_public
       - ./pb_migrations:/pb_migrations
     restart: unless-stopped
-    command: ["serve", "--dir=/pb_data", "--publicDir=/pb_public", "--migrationsDir=/pb_migrations", "--http=0.0.0.0:8090"]
+    command: ["--migrationsDir=/pb_migrations"]
 
   agent-server:
     build:

@@ -1,5 +1,6 @@
 import ThemeToggle from "./ThemeToggle";
 import UserProfileMenu from "./UserProfileMenu";
+import { formatCurrency } from "../utils/formatters";
 
 interface User {
   email: string;
@@ -86,7 +87,7 @@ export default function LandingHero({ onGetStarted, onLoginClick, isAuthenticate
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }} className="animate-fade-up">
             <div className="badge-emerald">
               <span className="material-symbols-outlined" style={{ fontSize: 13, fontVariationSettings: "'FILL' 1" }}>verified_user</span>
-              TRUSTED BY 10,000+ USERS
+              BUILT FOR INDIAN TAX LAW FY 2026-27
             </div>
 
             <h1 className="text-display" style={{ margin: 0 }}>
@@ -139,7 +140,7 @@ export default function LandingHero({ onGetStarted, onLoginClick, isAuthenticate
               <div style={{ marginBottom: 20 }}>
                 <p style={{ fontSize: 12, color: "var(--c-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 6px" }}>Projected Monthly Efficiency</p>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-                  <span style={{ fontSize: 36, fontWeight: 800, color: "var(--c-navy)", letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums" }}>₹35,000</span>
+                  <span style={{ fontSize: 36, fontWeight: 800, color: "var(--c-navy)", letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums" }}>{formatCurrency(35000)}</span>
                   <span style={{ background: "var(--c-emerald-lt)", color: "var(--c-emerald)", fontSize: 12, fontWeight: 700, padding: "3px 8px", borderRadius: 4, display: "flex", alignItems: "center", gap: 2 }}>
                     <span className="material-symbols-outlined" style={{ fontSize: 13, fontVariationSettings: "'FILL' 1" }}>arrow_upward</span>12.4%
                   </span>
@@ -155,9 +156,9 @@ export default function LandingHero({ onGetStarted, onLoginClick, isAuthenticate
                     <span className="material-symbols-outlined" style={{ fontSize: 16, color: "var(--c-emerald)" }}>health_and_safety</span>
                     <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--c-muted)" }}>Health Score</span>
                   </div>
-                  <div style={{ fontSize: 26, fontWeight: 700, color: "var(--c-emerald)", letterSpacing: "-0.02em" }}>847</div>
+                  <div style={{ fontSize: 26, fontWeight: 700, color: "var(--c-emerald)", letterSpacing: "-0.02em" }}>81.5<span style={{ fontSize: 14, color: "var(--c-muted)", fontWeight: 500 }}>/100</span></div>
                   <div className="progress-bar" style={{ marginTop: 8 }}>
-                    <div className="progress-bar-fill" style={{ width: "84.7%" }} />
+                    <div className="progress-bar-fill" style={{ width: "81.5%" }} />
                   </div>
                 </div>
 
@@ -200,15 +201,19 @@ export default function LandingHero({ onGetStarted, onLoginClick, isAuthenticate
 
       {/* ── SOCIAL PROOF STRIP ── */}
       <section style={{ borderTop: "1px solid var(--c-border)", borderBottom: "1px solid var(--c-border)", background: "var(--c-surface)", padding: "28px 24px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", textAlign: "center" }}>
-          <p style={{ fontSize: 18, fontWeight: 700, color: "var(--c-text)", margin: "0 0 16px", letterSpacing: "-0.01em" }}>
-            10,000+ users saved <span style={{ color: "var(--c-emerald)" }}>₹2.4 Crore</span> in interest collectively
-          </p>
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 40, opacity: 0.5, flexWrap: "wrap" }}>
-            {["QuantEdge Capital", "VertexCap", "StrataWealth", "OmniFinancial"].map(name => (
-              <span key={name} style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)", letterSpacing: "-0.01em" }}>{name}</span>
-            ))}
+        <div style={{ maxWidth: 1280, margin: "0 auto", textAlign: "center", display: "flex", justifyContent: "space-around", flexWrap: "wrap", gap: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 16, fontWeight: 600, color: "var(--c-text)", letterSpacing: "-0.01em" }}>
+            <span className="material-symbols-outlined" style={{ color: "var(--c-emerald)", fontVariationSettings: "'FILL' 1" }}>gavel</span>
+            Zero Hallucination Math
           </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 16, fontWeight: 600, color: "var(--c-text)", letterSpacing: "-0.01em" }}>
+            <span className="material-symbols-outlined" style={{ color: "var(--c-emerald)", fontVariationSettings: "'FILL' 1" }}>code</span>
+            100% Open Source
+          </div>
+          <a href="https://github.com/Harshit-925/FinReseilience_pro_CapStone_Project" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 16, fontWeight: 600, color: "var(--c-text)", letterSpacing: "-0.01em", textDecoration: "none" }}>
+            <span className="material-symbols-outlined" style={{ color: "var(--c-emerald)", fontVariationSettings: "'FILL' 1" }}>menu_book</span>
+            See Documentation
+          </a>
         </div>
       </section>
 
@@ -265,48 +270,16 @@ export default function LandingHero({ onGetStarted, onLoginClick, isAuthenticate
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
-      <section style={{ background: "var(--c-surface)", borderTop: "1px solid var(--c-border)", borderBottom: "1px solid var(--c-border)", padding: "72px 24px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-          <h2 style={{ textAlign: "center", fontSize: 32, fontWeight: 800, color: "var(--c-text)", margin: "0 0 48px", letterSpacing: "-0.02em" }}>
-            Institutional Results for Individuals
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
-            {[
-              { initials: "RA", name: "Rahul A.", role: "Tech Executive, Bengaluru", quote: "The Avalanche Engine restructuring saved me ₹4.2 Lakhs in projected interest on my home and personal loans. The clarity is unparalleled.", stars: 5 },
-              { initials: "SM", name: "Sneha M.", role: "Surgeon, Mumbai", quote: "Finally, a tool that treats personal finance with the seriousness it deserves. No gimmicks, just cold, hard mathematical optimization.", stars: 5 },
-              { initials: "VK", name: "Vikram K.", role: "Entrepreneur, Delhi", quote: "The tax optimization insights alone paid for the pro subscription in the first month. It's like having a CFO for your personal wealth.", stars: 5 },
-            ].map(({ initials, name, role, quote, stars }) => (
-              <div key={name} style={{ background: "var(--c-surface-alt, #FAFAF8)", border: "1px solid var(--c-border)", borderRadius: 8, padding: 24 }}>
-                <div style={{ display: "flex", gap: 3, marginBottom: 14 }}>
-                  {Array.from({ length: stars }).map((_, i) => (
-                    <span key={i} className="material-symbols-outlined" style={{ fontSize: 16, color: "#F59E0B", fontVariationSettings: "'FILL' 1" }}>star</span>
-                  ))}
-                </div>
-                <p style={{ fontSize: 14, color: "var(--c-text-muted)", lineHeight: 1.7, margin: "0 0 20px", fontStyle: "italic" }}>"{quote}"</p>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--c-navy-mid)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff" }}>
-                    {initials}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)" }}>{name}</div>
-                    <div style={{ fontSize: 12, color: "var(--c-muted)" }}>{role}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
 
       {/* ── CTA BANNER ── */}
       <section style={{ maxWidth: 1280, margin: "0 auto", padding: "64px 24px" }}>
         <div style={{ background: "var(--c-navy)", borderRadius: 12, padding: "56px 48px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 32 }}>
           <div>
-            <h2 style={{ margin: "0 0 10px", fontSize: 30, fontWeight: 800, color: "#fff", letterSpacing: "-0.02em" }}>
+            <h2 style={{ margin: "0 0 10px", fontSize: 30, fontWeight: 800, color: "var(--c-bg)", letterSpacing: "-0.02em" }}>
               Your financial freedom starts today.
             </h2>
-            <p style={{ margin: 0, fontSize: 16, color: "rgba(255,255,255,0.65)", lineHeight: 1.6 }}>
+            <p style={{ margin: 0, fontSize: 16, color: "var(--c-bg)", opacity: 0.8, lineHeight: 1.6 }}>
               No credit card. No commitment. Full access to every feature — free, forever.
             </p>
           </div>
@@ -315,25 +288,6 @@ export default function LandingHero({ onGetStarted, onLoginClick, isAuthenticate
           </button>
         </div>
       </section>
-
-      {/* ── FOOTER ── */}
-      <footer style={{ borderTop: "1px solid var(--c-border)", background: "var(--c-surface)", padding: "32px 24px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16, paddingRight: 80 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: 16, color: "var(--c-text)" }}>
-            <span className="material-symbols-outlined" style={{ color: "var(--c-emerald)", fontSize: 18 }}>account_balance</span>
-            FinResilience Pro
-          </div>
-          <div style={{ fontSize: 13, color: "var(--c-muted)" }}>© 2024 FinResilience Pro. All rights reserved.</div>
-          <div style={{ display: "flex", gap: 20 }}>
-            {["Privacy", "Terms", "Security", "Contact"].map(link => (
-              <a key={link} href={`/${link.toLowerCase()}.html`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--c-muted)", textDecoration: "none", transition: "color 0.15s" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "var(--c-text)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "var(--c-muted)")}
-              >{link}</a>
-            ))}
-          </div>
-        </div>
-      </footer>
 
       <style>{`
         @media (max-width: 900px) {
